@@ -1,0 +1,123 @@
+server:
+  forward-headers-strategy: framework
+security:
+  require-ssl: true
+spring:
+  application:
+    name: topnivo-backend
+  datasource:
+#      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/topnivo_db
+#      username: chris
+#      password: Chris@24
+    url: jdbc:postgresql://localhost:5432/postgres?createDatabaseIfNotExists=true
+    username: postgres
+    password: chris
+  jpa:
+    showSql: true
+    hibernate:
+      ddlAuto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  h2:
+    console:
+      enabled: true
+      settings:
+        webAllowOthers: true
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+  mail:
+    host: smtp.gmail.com
+    username: topnivoinfo@gmail.com
+    password: hvfsxcpwkluxhhxo
+#    username: olojedechristopher24@gmail.com
+#    password: uapoewtxdaxrarqe
+    port: 587
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: "*"
+          auth: true
+application:
+  secretKey: lkjhgfdgghjhkLKJHGJHGHoiFGGikjYTUoitgyUIOuuuIOIUuyhOLIJUhyolYTuyuhIYOIUUTGyuoiYUJuoiYGUJIkuiUTGYIuUYuouYIUJOUoiuUJiuIYUouOLIOK
+  access-token-expiration: 86400000
+  refresh-token-expiration: 604099898
+paystack:
+  privateKey: ${PAYSTACK_SECRET_KEY:}
+  verifyPayment: ${PAYSTACK_VERIFY_PAYMENT:false}
+  url:
+    banks: https://api.paystack.co/bank?currency=NGN
+    verify: https://api.paystack.co/transfer
+    transactionVerify: https://api.paystack.co/transaction/verify
+    transferVerify: https://api.paystack.co/transfer/verify
+    transferRecipient: https://api.paystack.co/transferrecipient
+    transferBulk: https://api.paystack.co/transfer/bulk
+    balance: https://api.paystack.co/balance
+
+#
+#server:
+#  forward-headers-strategy: framework
+#security:
+#  require-ssl: true
+#spring:
+#  application:
+#    name: topnivo-backend
+#  datasource:
+#    #      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/topnivo_db
+#    #      username: chris
+#    #      password: Chris@24
+#    #    url: jdbc:postgresql://topnivo-database-prod.czkky82cesmu.eu-west-2.rds.amazonaws.com:5432/topnivo_db
+#    #    username: topnivo_app_user
+#    #    password: topnivo_app_user@2025
+#    url: jdbc:postgresql://localhost:5432/postgres?createDatabaseIfNotExists=true
+#    username: postgres
+#    password: chris
+#  jpa:
+#    showSql: true
+#    hibernate:
+#      ddlAuto: create-drop
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#  h2:
+#    console:
+#      enabled: true
+#      settings:
+#        webAllowOthers: true
+#  main:
+#    allow-circular-references: true
+#    allow-bean-definition-overriding: true
+#  mail:
+#    host: smtp.gmail.com
+#    username: topnivoinfo@gmail.com
+#    password: hvfsxcpwkluxhhxo
+#    #    username: olojedechristopher24@gmail.com
+#    #    password: uapoewtxdaxrarqe
+#    port: 587
+#    properties:
+#      mail:
+#        smtp:
+#          starttls:
+#            enable: true
+#            required: true
+#          ssl:
+#            trust: "*"
+#          auth: true
+#application:
+#  secretKey: lkjhgfdgghjhkLKJHGJHGHoiFGGikjYTUoitgyUIOuuuIOIUuyhOLIJUhyolYTuyuhIYOIUUTGyuoiYUJuoiYGUJIkuiUTGYIuUYuouYIUJOUoiuUJiuIYUouOLIOK
+#  access-token-expiration: 86400000
+#  refresh-token-expiration: 604099898
+#paystack:
+#  privateKey: sk_live_d04c5c68c5d6622f053b7baf4c23697a016b6e28
+#  url:
+#    banks: https://api.paystack.co/bank?currency=NGN
+#    verify: https://api.paystack.co/transfer
+#    transferRecipient: https://api.paystack.co/transferrecipient
+#    transferBulk: https://api.paystack.co/transfer/bulk
+#    balance: https://api.paystack.co/balance
+

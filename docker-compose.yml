@@ -1,0 +1,9 @@
+services:
+  webpostgres:
+    container_name: festive_poincare-webpostgres
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_POSTGRES_PORT:-5050}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

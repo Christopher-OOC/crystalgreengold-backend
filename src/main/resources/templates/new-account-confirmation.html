@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Creation Confirmation</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffdd33;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #555;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+        }
+
+        .password-box {
+            background-color: #f0f5ff;
+            border-left: 4px solid #4a6cf7;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 18px;
+            border-radius: 4px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Hello [[${memberName}]],</h1>
+    <p>
+        A huge welcome to Topnivo! We're thrilled to have you on board.
+        Your account has been successfully created. To get started, please use the temporary password below for your first login.
+        <div class="password-box">
+            <h2>Username: [[${username}]]</h2>
+            <h2>Temporary Password: [[${password}]]</h2>
+        </div>
+        For your security, we strongly recommend that you change this password immediately after logging in.
+        <button><a href="https://topnivo.netlify.app">Log In to Your Account</a></button>.
+        Need help or have questions? Simply reply to this email—we're happy to help!
+        Cheers,
+        The Topnivo Team
+    </p>
+    <div class="footer">
+        <p>&copy; 2025 Topnivo. All rights reserved.</p>
+    </div>
+</div>
+</body>
+
+</html>

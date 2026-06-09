@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 6px;
+            text-align: center;
+        }
+        .total-row td {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <p>Store Name: <span th:text="${storeName}"></span></p>
+    <p>Order Number: <span th:text="${orderNumber}"></span></p>
+    <p>Reference ID: <span th:text="${referenceId}"></span></p>
+    <p>Date: <span th:text="${orderDate}"></span></p>
+    <p>Contact: <span th:text="${contact}"></span></p>
+<!--    <h3 style="text-align: center;">TOPNIVO ORDER FORM <a th:href="@{http://localhost:8080/api/v1/resources/orders/{id}(id=${orderNumber})}" th:download="'topnivo-order.pdf'">Click to Download</a></h3>-->
+    <h3 style="text-align: center;">TOPNIVO ORDER FORM <a th:href="@{https://topnivo.org/api/v1/resources/orders/{id}(id=${orderNumber})}" th:download="'topnivo-order.pdf'">Click to Download</a></h3>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>SN</th>
+        <th>PRODUCT NAME</th>
+        <th>PRICE</th>
+        <th>QTY</th>
+        <th>PV</th>
+        <th>BV</th>
+        <th>AMOUNT</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="orderItem, iterStat : ${productItems}">
+        <td th:text="${iterStat.index + 1}">1</td>
+        <td th:text="${orderItem.name}"></td>
+        <td th:text="${orderItem.price}"></td>
+        <td th:text="${orderItem.quantity}"></td>
+        <td th:text="${orderItem.totalPv}"></td>
+        <td th:text="${orderItem.totalBv}"></td>
+        <td th:text="${orderItem.totalPrice}"></td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr class="total-row">
+        <td>TOTAL</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td th:text="${totalPv}"></td>
+        <td th:text="${totalBv}"></td>
+        <td th:text="${totalAmount}"></td>
+    </tr>
+    </tfoot>
+</table>
+</body>
+</html>
