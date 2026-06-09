@@ -6,7 +6,7 @@ spring:
   application:
     name: topnivo-backend
   datasource:
-#      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/topnivo_db
+#      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/crystalgreengold_db
 #      username: chris
 #      password: Chris@24
     url: jdbc:postgresql://localhost:5432/postgres?createDatabaseIfNotExists=true
@@ -29,10 +29,10 @@ spring:
     allow-bean-definition-overriding: true
   mail:
     host: smtp.gmail.com
-    username: topnivoinfo@gmail.com
-    password: hvfsxcpwkluxhhxo
-#    username: olojedechristopher24@gmail.com
-#    password: uapoewtxdaxrarqe
+#    username: topnivoinfo@gmail.com
+#    password: hvfsxcpwkluxhhxo
+    username: olojedechristopher24@gmail.com
+    password: uapoewtxdaxrarqe
     port: 587
     properties:
       mail:
@@ -44,7 +44,7 @@ spring:
             trust: "*"
           auth: true
 application:
-  secretKey: lkjhgfdgghjhkLKJHGJHGHoiFGGikjYTUoitgyUIOuuuIOIUuyhOLIJUhyolYTuyuhIYOIUUTGyuoiYUJuoiYGUJIkuiUTGYIuUYuouYIUJOUoiuUJiuIYUouOLIOK
+  secretKey: lkjhgfdgghjhkLKJHGJHGHoiFGGikjYTUoitgyUIOuuuIOIUuyhOLdjjfkgjkgjIJUhyolYTuyuhIYOIUUTGyuoiYUJuoiYGUJIkuiUTGYIuUYuouYIUJOUoiuUJiuIYUouOLIOK
   access-token-expiration: 86400000
   refresh-token-expiration: 604099898
 paystack:
