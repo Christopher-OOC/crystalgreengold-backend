@@ -3,11 +3,11 @@ package com.topnivo.backend.model.constant;
 public enum PackageName {
 
     FREE,
-    FOUNDATION,
-    CLASSIC,
+    STARTER,
+    BASIC,
+    BRONZE,
     SILVER,
-    PLATINUM,
     GOLD,
+    PLATINUM,
     DIAMOND,
-    INFINITY,
 }

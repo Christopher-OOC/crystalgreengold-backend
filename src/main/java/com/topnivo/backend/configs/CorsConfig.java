@@ -12,7 +12,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
         registry.addMapping("/**")
 //                .allowedOrigins("http://localhost:5173")
-                .allowedOrigins("http://localhost:3000", "http://localhost:5173", "https://topnivo.netlify.app", "https://new-topnivo-frontend.vercel.app", "https://topnivo.org", "https://www.topnivo.org")
+                .allowedOrigins("http://localhost:3000", "http://localhost:5173", "https://topnivo.netlify.app", "https://crystalgreengold.com", "https://www.crystalgreengold.com", "https://topnivo.org", "https://www.topnivo.org")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("*")

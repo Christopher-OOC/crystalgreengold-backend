@@ -322,8 +322,8 @@ public class CommissionService {
         PackageName packageName = PackageName.valueOf(name);
 
         switch (packageName) {
-            case FREE, FOUNDATION -> processEntryPackageUnilevel(member, totalBoughtPv);
-            case CLASSIC -> processBoosterPackageUnilevel(member, totalBoughtPv);
+            case FREE, STARTER -> processEntryPackageUnilevel(member, totalBoughtPv);
+            case BASIC -> processBoosterPackageUnilevel(member, totalBoughtPv);
             default -> processPremiumPackageUnilevel(member, totalBoughtPv);
         }
     }
