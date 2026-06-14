@@ -56,7 +56,7 @@ public class ErrorMessages {
     public static final String NO_SPONSOR_AND_PLACER = "You must activate your sponsor and placer!";
     public static final String NO_IMAGE_IN_PROMOTION = "There must be image specified to create a promotion!";
     public static final String NO_SUCH_PROMOTION = "No such promotion!";
-    public static final String INVALID_PACKAGE_NAME = "Package name can only be FOUNDATION, CLASSIC, SILVER, PLATINUM, GOLD, DIAMOND or INFINITY!";
+    public static final String INVALID_PACKAGE_NAME = "Package name can only be STARTER, BASIC, BRONZE, SILVER, PLATINUM, GOLD or DIAMOND!";
     public static final String INVALID_HAS_RECEIVED = "You can only use (ALL, TRUE, FALSE)";
     public static final String RANK_ALREADY_EXIST = "A rank with the same name already exists!";
     public static final String RANK_VALUE_ALREADY_EXIST = "A rank with the rank value already exists!";
