@@ -525,13 +525,13 @@ public class MemberService {
         double newPrice = roundToTwoDecimalPlaces(newPackage.getPrice());
         double currentPrice = roundToTwoDecimalPlaces(member.getCurrentPackage().getPrice());
         Package oldPackage = member.getCurrentPackage();
-
-        if (newPrice == currentPrice) {
-            throw new PackageDowngradeException(ErrorMessages.ALREADY_ON_PACKAGE);
-        }
-        if (newPrice < currentPrice) {
-            throw new PackageDowngradeException(ErrorMessages.PACKAGE_DOWNGRADE);
-        }
+//
+//        if (newPrice == currentPrice) {
+//            throw new PackageDowngradeException(ErrorMessages.ALREADY_ON_PACKAGE);
+//        }
+//        if (newPrice < currentPrice) {
+//            throw new PackageDowngradeException(ErrorMessages.PACKAGE_DOWNGRADE);
+//        }
 
         double amountToPay = newPrice - currentPrice;
         double differenceInPv = newPackage.getPv() - oldPackage.getPv();
@@ -805,8 +805,10 @@ public class MemberService {
                         commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
 
                         if (storeRoleType != UserRoleType.ADMIN) {
-                            storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - 1);
-                            storePackageRepository.save(storePackage);
+                            if (storePackage != null) {
+                                storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - 1);
+                                storePackageRepository.save(storePackage);
+                            }
                         }
                     } else {
                         bv = newPackage.getBv() * orderItem.getQuantity();
@@ -826,8 +828,10 @@ public class MemberService {
                         }
 
                         if (storeRoleType != UserRoleType.ADMIN) {
-                            storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - orderItem.getQuantity());
-                            storePackageRepository.save(storePackage);
+                            if (storePackage != null) {
+                                storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - orderItem.getQuantity());
+                                storePackageRepository.save(storePackage);
+                            }
                         }
                     }
 
