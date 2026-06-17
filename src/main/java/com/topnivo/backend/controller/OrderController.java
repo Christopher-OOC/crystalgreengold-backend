@@ -68,6 +68,7 @@ public class OrderController {
             order = orderService.makePaidOrder(memberId, request, paymentReference, amountPaid);
         }
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+        Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
 
         ApiResponse<OrderResponse> response = new ApiResponse<>(
                 ResponseStatus.CREATED.name(),

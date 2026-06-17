@@ -723,7 +723,7 @@ public class MemberService {
         Member boughtFromStore = null;
 
         if (store == null) {
-            if (storeRoleType != UserRoleType.ADMIN) {
+            if (storeRoleType != UserRoleType.PREMIUM_STORE) {
                 throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
             }
         } else {
@@ -859,8 +859,10 @@ public class MemberService {
                             storeProductRepository.save(buyerStoreProduct);
                         }
 
-                        sellerStoreProduct.setBoughtQuantity(sellerStoreProduct.getBoughtQuantity() - orderItem.getQuantity());
-                        storeProductRepository.save(sellerStoreProduct);
+                        if (sellerStoreProduct != null) {
+                            sellerStoreProduct.setBoughtQuantity(sellerStoreProduct.getBoughtQuantity() - orderItem.getQuantity());
+                            storeProductRepository.save(sellerStoreProduct);
+                        }
                     }
 
                     commissionService.sendPremiumStoreBonus(store, pv);
