@@ -366,7 +366,9 @@ public class MemberService {
         return rootNode;
     }
 
-    public Member activatePackageById(String memberId, int packageId, String storeId, String txnReference) throws MessagingException {
+    public Order activatePackageById(String memberId, int packageId, String storeId, String txnReference) throws MessagingException {
+        Order returnOrder = null;
+
         paymentService.checkPaymentValidity(txnReference);
 
         if (Objects.equals(storeId, "null") || storeId == null) {
@@ -394,16 +396,16 @@ public class MemberService {
                 roleType == UserRoleType.SERVICE_CENTER ||
                 roleType == UserRoleType.PREMIUM_STORE) {
             if (member.getCurrentPackage() == null) {
-                activateNewPackage(member, store, newPackage, roleType);
+                returnOrder = activateNewPackage(member, store, newPackage, roleType);
             } else {
-                upgradePackage(member, store, newPackage, roleType);
+                returnOrder = upgradePackage(member, store, newPackage, roleType);
             }
         } else {
             throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
         }
 
         member.setLastActive(LocalDateTime.now());
-        return memberRepository.save(member);
+        return returnOrder;
     }
 
     private Transaction createTransaction(
@@ -428,13 +430,14 @@ public class MemberService {
         return transactionRepository.save(transaction);
     }
 
-    private void activateNewPackage(Member member, Member store, Package newPackage, UserRoleType roleType) throws MessagingException {
+    private Order activateNewPackage(Member member, Member store, Package newPackage, UserRoleType roleType) throws MessagingException {
         double packagePrice = roundToTwoDecimalPlaces(newPackage.getPrice());
+        Order order = null;
 
         if (roleType == UserRoleType.PREMIUM_STORE) {
             if (store == null) {
                 PackageOrderItem orderItem = createPackageOrderItem(newPackage, 1);
-                Order order = createOrder(member, null, packagePrice, orderItem, OrderType.ACTIVATE_PACKAGE);
+                order = createOrder(member, null, packagePrice, orderItem, OrderType.ACTIVATE_PACKAGE);
 
                 String txId = TransactionUtils.generateTransactionId();
                 createTransaction(
@@ -468,7 +471,7 @@ public class MemberService {
             validateAndGetStorePackage(store, newPackage, roleType);
 
             PackageOrderItem orderItem = createPackageOrderItem(newPackage, 1);
-            Order order = createOrder(member, store, packagePrice, orderItem, OrderType.ACTIVATE_PACKAGE);
+            order = createOrder(member, store, packagePrice, orderItem, OrderType.ACTIVATE_PACKAGE);
 
             String txId = TransactionUtils.generateTransactionId();
             createTransaction(
@@ -493,8 +496,15 @@ public class MemberService {
             order.setTransaction(transaction);
             orderRepository.save(order);
 
-            sendOrderPackageEmail(member, order, store, txId, newPackage);
+            try {
+                sendOrderPackageEmail(member, order, store, txId, newPackage);
+            }
+            catch (Exception ex) {
+
+            }
         }
+
+        return order;
     }
 
     private void sendOrderPackageEmail(Member member, Order order, Member store, String txId, Package aPackage) throws MessagingException {
@@ -509,7 +519,9 @@ public class MemberService {
         );
     }
 
-    private void upgradePackage(Member member, Member store, Package newPackage, UserRoleType roleType) throws MessagingException {
+    private Order upgradePackage(Member member, Member store, Package newPackage, UserRoleType roleType) throws MessagingException {
+        Order order;
+
         double newPrice = roundToTwoDecimalPlaces(newPackage.getPrice());
         double currentPrice = roundToTwoDecimalPlaces(member.getCurrentPackage().getPrice());
         Package oldPackage = member.getCurrentPackage();
@@ -528,7 +540,7 @@ public class MemberService {
         if (roleType == UserRoleType.PREMIUM_STORE) {
             if (store == null) {
                 PackageOrderItem orderItem = createPackageOrderItem(newPackage, 1);
-                Order order = createOrder(member, null, amountToPay, orderItem, OrderType.UPGRADE_PACKAGE);
+                order = createOrder(member, null, amountToPay, orderItem, OrderType.UPGRADE_PACKAGE);
 
                 String txId = TransactionUtils.generateTransactionId();
                 createTransaction(
@@ -564,7 +576,7 @@ public class MemberService {
             validateAndGetStorePackage(store, newPackage, roleType);
 
             PackageOrderItem orderItem = createPackageOrderItem(newPackage, 1);
-            Order order = createOrder(member, store, amountToPay, orderItem, OrderType.UPGRADE_PACKAGE);
+            order = createOrder(member, store, amountToPay, orderItem, OrderType.UPGRADE_PACKAGE);
 
             String txId = TransactionUtils.generateTransactionId();
             createTransaction(
@@ -589,11 +601,20 @@ public class MemberService {
             order.setTransaction(transaction);
             orderRepository.save(order);
 
-            sendOrderPackageEmail(member, order, store, txId, newPackage);
+            try {
+                sendOrderPackageEmail(member, order, store, txId, newPackage);
+            }
+            catch (Exception ex) {
+
+            }
         }
+
+        return order;
     }
 
-    public Member buyPackageById(String memberId, int packageId, String storeId, int quantity, String txnReference) throws MessagingException {
+    public Order buyPackageById(String memberId, int packageId, String storeId, int quantity, String txnReference) throws MessagingException {
+        Order order = null;
+
         paymentService.checkPaymentValidity(txnReference);
 
         if (Objects.equals(storeId, "null") || storeId == null) {
@@ -617,24 +638,26 @@ public class MemberService {
         UserRoleType roleType = determineUserRoleType();
 
         if (roleType == UserRoleType.SERVICE_CENTER && store != null) {
-            buyPackage(member, store, newPackage, quantity);
+            order = buyPackage(member, store, newPackage, quantity);
         } else if (roleType == UserRoleType.PREMIUM_STORE && store == null) {
-            buyPackage(member, null, newPackage, quantity);
+            order = buyPackage(member, null, newPackage, quantity);
         } else {
             throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
         }
 
         member.setLastActive(LocalDateTime.now());
-        return memberRepository.save(member);
+        return order;
     }
 
-    private void buyPackage(Member member, Member store, Package newPackage, int quantity) throws MessagingException {
+    private Order buyPackage(Member member, Member store, Package newPackage, int quantity) throws MessagingException {
+        Order order = null;
+
         double totalPackagePrice = roundToTwoDecimalPlaces(newPackage.getPrice() * quantity);
 
         if (store == null) {
             // For premium store
             PackageOrderItem orderItem = createPackageOrderItem(newPackage, quantity);
-            Order order = createOrder(member, null, totalPackagePrice, orderItem, OrderType.BUY_PACKAGE);
+            order = createOrder(member, null, totalPackagePrice, orderItem, OrderType.BUY_PACKAGE);
 
             String txId = TransactionUtils.generateTransactionId();
             createTransaction(
@@ -659,7 +682,11 @@ public class MemberService {
             order.setTransaction(transaction);
             orderRepository.save(order);
 
-            sendOrderPackageEmail(member, order, store, txId, newPackage);
+            try {
+                sendOrderPackageEmail(member, order, store, txId, newPackage);
+            } catch (Exception ignored) {
+
+            }
         } else {
             // For service center
             StorePackage storePackage = storePackageRepository.findByStoreAndPac(store, newPackage);
@@ -671,7 +698,7 @@ public class MemberService {
             }
 
             PackageOrderItem orderItem = createPackageOrderItem(newPackage, quantity);
-            Order order = createOrder(member, store, totalPackagePrice, orderItem, OrderType.BUY_PACKAGE);
+            order = createOrder(member, store, totalPackagePrice, orderItem, OrderType.BUY_PACKAGE);
 
             String txId = TransactionUtils.generateTransactionId();
             createTransaction(
@@ -696,10 +723,14 @@ public class MemberService {
             order.setTransaction(transaction);
             orderRepository.save(order);
 
-            sendOrderPackageEmail(member, order, store, txId, newPackage);
+            try {
+                sendOrderPackageEmail(member, order, store, txId, newPackage);
+            } catch (Exception e) {
+
+            }
         }
 
-        memberRepository.save(member);
+        return order;
     }
 
     public Member confirmOrderById(String memberId, String orderId, String status) {

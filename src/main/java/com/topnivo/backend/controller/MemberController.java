@@ -3,6 +3,7 @@ package com.topnivo.backend.controller;
 import com.topnivo.backend.mapper.MemberMapper;
 import com.topnivo.backend.model.constant.MemberLeg;
 import com.topnivo.backend.model.entity.Member;
+import com.topnivo.backend.model.entity.Order;
 import com.topnivo.backend.model.request.*;
 import com.topnivo.backend.model.response.*;
 import com.topnivo.backend.model.response.ResponseStatus;
@@ -178,7 +179,8 @@ public class MemberController {
             @RequestBody ActivatePackageRequest request
     ) throws MessagingException {
 
-        Member member = memberService.activatePackageById(memberId, request.getPackageId(), request.getStoreId(), request.getTxnReference());
+        Order order = memberService.activatePackageById(memberId, request.getPackageId(), request.getStoreId(), request.getTxnReference());
+        Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
         MemberResponse memberResponse = memberMapper.memberToResponse(member);
         ApiResponse<MemberResponse> response = new ApiResponse<>(
                 ResponseStatus.ACTIVATED.name(),
@@ -195,7 +197,8 @@ public class MemberController {
             @PathVariable("memberId") String memberId,
             @RequestBody BuyPackageRequest request
     ) throws MessagingException {
-        Member member = memberService.buyPackageById(memberId, request.getPackageId(), request.getStoreId(), request.getQuantity(), request.getTxnReference());
+        Order order = memberService.buyPackageById(memberId, request.getPackageId(), request.getStoreId(), request.getQuantity(), request.getTxnReference());
+        Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
         MemberResponse memberResponse = memberMapper.memberToResponse(member);
         ApiResponse<MemberResponse> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
