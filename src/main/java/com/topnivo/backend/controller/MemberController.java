@@ -181,7 +181,7 @@ public class MemberController {
 
         Order order = memberService.activatePackageById(memberId, request.getPackageId(), request.getStoreId(), request.getTxnReference());
         Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
-        MemberResponse memberResponse = memberMapper.memberToResponse(member);
+        MemberResaddponse memberResponse = memberMapper.memberToResponse(member);
         ApiResponse<MemberResponse> response = new ApiResponse<>(
                 ResponseStatus.ACTIVATED.name(),
                 "Package activated successfully!",
