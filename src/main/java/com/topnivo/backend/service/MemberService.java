@@ -379,13 +379,13 @@ public class MemberService {
         Package newPackage = packageService.findPackageById(packageId);
 
         List<Order> activateOrders = orderRepository.findByMemberAndOrderType(member, OrderType.ACTIVATE_PACKAGE);
-        if (!activateOrders.isEmpty()) {
-           for (Order order : activateOrders) {
-               if (order.getTransaction().getStatus() == TransactionStatus.NOT_CONFIRMED) {
-                  throw new BadRequestException(ErrorMessages.CANNOT_ACTIVATE_PACKAGE_AGAIN);
-               }
-           }
-        }
+//        if (!activateOrders.isEmpty()) {
+//           for (Order order : activateOrders) {
+//               if (order.getTransaction().getStatus() == TransactionStatus.NOT_CONFIRMED) {
+//                  throw new BadRequestException(ErrorMessages.CANNOT_ACTIVATE_PACKAGE_AGAIN);
+//               }
+//           }
+//        }
 
         validateSponsorAndPlacer(member);
         validatePackage(newPackage);
@@ -498,8 +498,7 @@ public class MemberService {
 
             try {
                 sendOrderPackageEmail(member, order, store, txId, newPackage);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
 
             }
         }
@@ -603,8 +602,7 @@ public class MemberService {
 
             try {
                 sendOrderPackageEmail(member, order, store, txId, newPackage);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
 
             }
         }
@@ -758,7 +756,7 @@ public class MemberService {
                 throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
             }
         } else {
-            if (!store.getMemberId().equals(memberId)) {
+            if (store.getMemberId().equals(memberId)) {
                 throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
             }
         }
@@ -774,77 +772,74 @@ public class MemberService {
                 double bv;
                 double pv;
 
-                if (storeRoleType == UserRoleType.ADMIN ||
-                        storeRoleType == UserRoleType.PREMIUM_STORE ||
-                        storeRoleType == UserRoleType.SERVICE_CENTER) {
 
-                    StorePackage storePackage = storePackageRepository.findByStoreAndPac(store, newPackage);
+                StorePackage storePackage = storePackageRepository.findByStoreAndPac(store, newPackage);
 
-                    if (storePackage != null) {
-                        boughtFromStore = storePackage.getBoughtFromStore();
-                    }
+                if (storePackage != null) {
+                    boughtFromStore = storePackage.getBoughtFromStore();
+                }
 
-                    if (order.getOrderType() == OrderType.ACTIVATE_PACKAGE) {
-                        bv = newPackage.getBv();
-                        pv = newPackage.getPv();
+                if (order.getOrderType() == OrderType.ACTIVATE_PACKAGE) {
+                    bv = newPackage.getBv();
+                    pv = newPackage.getPv();
 
-                        buyer.setCurrentPackage(newPackage);
-                        commissionService.updateSponsorNewRegistrationCount(buyer);
-                        commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+                    buyer.setCurrentPackage(newPackage);
+                    commissionService.updateSponsorNewRegistrationCount(buyer);
+                    commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
 
-                        if (storeRoleType != UserRoleType.ADMIN) {
+                    if (storeRoleType != UserRoleType.ADMIN) {
+                        if (storePackage != null) {
                             storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - 1);
                             storePackageRepository.save(storePackage);
                         }
-
-                    } else if (order.getOrderType() == OrderType.UPGRADE_PACKAGE) {
-                        bv = newPackage.getBv() - oldPackage.getBv();
-                        pv = newPackage.getPv() - oldPackage.getPv();
-
-                        buyer.setCurrentPackage(newPackage);
-                        commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
-
-                        if (storeRoleType != UserRoleType.ADMIN) {
-                            if (storePackage != null) {
-                                storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - 1);
-                                storePackageRepository.save(storePackage);
-                            }
-                        }
-                    } else {
-                        bv = newPackage.getBv() * orderItem.getQuantity();
-                        pv = newPackage.getPv() * orderItem.getQuantity();
-
-                        StorePackage oldStorePackage = storePackageRepository.findByStoreAndPac(buyer, newPackage);
-                        if (oldStorePackage == null) {
-                            StorePackage newStorePackage = new StorePackage();
-                            newStorePackage.setPac(newPackage);
-                            newStorePackage.setStore(buyer);
-                            newStorePackage.setBoughtQuantity(orderItem.getQuantity());
-                            newStorePackage.setBoughtFromStore(storePackage != null ? storePackage.getStore() : null);
-                            storePackageRepository.save(newStorePackage);
-                        } else {
-                            oldStorePackage.setBoughtQuantity(oldStorePackage.getBoughtQuantity() + orderItem.getQuantity());
-                            storePackageRepository.save(oldStorePackage);
-                        }
-
-                        if (storeRoleType != UserRoleType.ADMIN) {
-                            if (storePackage != null) {
-                                storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - orderItem.getQuantity());
-                                storePackageRepository.save(storePackage);
-                            }
-                        }
                     }
 
-                    if (storeRoleType == UserRoleType.PREMIUM_STORE) {
-                        commissionService.sendPremiumStoreBonus(store, pv);
-                    } else if (storeRoleType == UserRoleType.SERVICE_CENTER) {
-                        commissionService.sendServiceCenterBonus(store, boughtFromStore, pv);
-                    }
+                } else if (order.getOrderType() == OrderType.UPGRADE_PACKAGE) {
+                    bv = newPackage.getBv() - oldPackage.getBv();
+                    pv = newPackage.getPv() - oldPackage.getPv();
 
-                    commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, pv);
+                    buyer.setCurrentPackage(newPackage);
+                    commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+
+                    if (storeRoleType != UserRoleType.ADMIN) {
+                        if (storePackage != null) {
+                            storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - 1);
+                            storePackageRepository.save(storePackage);
+                        }
+                    }
                 } else {
-                    throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
+                    bv = newPackage.getBv() * orderItem.getQuantity();
+                    pv = newPackage.getPv() * orderItem.getQuantity();
+
+                    StorePackage oldStorePackage = storePackageRepository.findByStoreAndPac(buyer, newPackage);
+                    if (oldStorePackage == null) {
+                        StorePackage newStorePackage = new StorePackage();
+                        newStorePackage.setPac(newPackage);
+                        newStorePackage.setStore(buyer);
+                        newStorePackage.setBoughtQuantity(orderItem.getQuantity());
+                        newStorePackage.setBoughtFromStore(storePackage != null ? storePackage.getStore() : null);
+                        storePackageRepository.save(newStorePackage);
+                    } else {
+                        oldStorePackage.setBoughtQuantity(oldStorePackage.getBoughtQuantity() + orderItem.getQuantity());
+                        storePackageRepository.save(oldStorePackage);
+                    }
+
+                    if (storeRoleType != UserRoleType.ADMIN) {
+                        if (storePackage != null) {
+                            storePackage.setBoughtQuantity(storePackage.getBoughtQuantity() - orderItem.getQuantity());
+                            storePackageRepository.save(storePackage);
+                        }
+                    }
                 }
+
+                if (storeRoleType == UserRoleType.PREMIUM_STORE) {
+                    commissionService.sendPremiumStoreBonus(store, pv);
+                } else if (storeRoleType == UserRoleType.SERVICE_CENTER) {
+                    commissionService.sendServiceCenterBonus(store, boughtFromStore, pv);
+                }
+
+                commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, pv);
+
             } else if (order.getOrderType() == OrderType.BUY_PRODUCT) {
                 List<OrderItem> orderItems = order.getOrderItems();
                 double bv = orderItems.stream().mapToDouble(o -> o.getBv() * o.getQuantity()).sum();
@@ -1127,8 +1122,7 @@ public class MemberService {
                     "You received %f from %s.".formatted(transferRequest.getAmount(), fromMember.getUsername()));
 
             return memberRepository.save(fromMember);
-        }
-        else {
+        } else {
             throw new InsufficientBalanceException(ErrorMessages.INSUFFICIENT_FUNDS);
         }
     }
