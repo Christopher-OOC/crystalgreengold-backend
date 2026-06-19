@@ -113,57 +113,57 @@ public class CommissionService {
                 sponsor.getCurrentPackage().getName();
 
         switch (packageName) {
-            case "FREE", "FOUNDATION":
+            case "FREE", "STARTER":
                 return switch (level) {
-                    case 1 -> 25;
+                    case 1 -> 30;
                     default -> 0;
                 };
-            case "CLASSIC":
+            case "BASIC":
                 return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    default -> 0;
+                };
+            case "BRONZE":
+                return switch (level) {
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    case 3 -> 1;
                     default -> 0;
                 };
             case "SILVER":
                 return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
-                    case 3 -> 4;
-                    default -> 0;
-                };
-            case "PLATINUM":
-                return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
-                    case 3 -> 4;
-                    case 4 -> 3;
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    case 3 -> 1;
+                    case 4 -> 1;
                     default -> 0;
                 };
             case "GOLD":
                 return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
-                    case 3 -> 4;
-                    case 4 -> 2;
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    case 3 -> 1;
+                    case 4 -> 1;
                     default -> 0;
                 };
             case "DIAMOND":
                 return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
-                    case 3 -> 4;
-                    case 4 -> 2;
-                    case 5 -> 2;
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    case 3 -> 1;
+                    case 4 -> 1;
+                    case 5 -> 1;
                     default -> 0;
                 };
-            case "INFINITY":
+            case "PLATINUM":
                 return switch (level) {
-                    case 1 -> 25;
-                    case 2 -> 5;
-                    case 3 -> 4;
-                    case 4 -> 2;
-                    case 5 -> 2;
-                    case 6 -> 2;
+                    case 1 -> 30;
+                    case 2 -> 2;
+                    case 3 -> 1;
+                    case 4 -> 1;
+                    case 5 -> 1;
+                    case 6 -> 1;
                     default -> 0;
                 };
             default:
