@@ -90,7 +90,7 @@ public class CommissionService {
         double pvEquivalence = getAdminSettingValue(AdminSettings.PV_EQUIVALENCE);
         double value = roundToTwoDecimalPlaces(pvEquivalence * amountPv);
 
-        member.setAvailableBalance(member.getAvailableBalance() + value);
+        member.setAvailableBalance(Math.abs(member.getAvailableBalance() + value));
         member.setLastEarned(new Date());
         memberRepository.save(member);
 
@@ -255,7 +255,7 @@ public class CommissionService {
 
         double value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(member, binaryPvValue);
 
-        member.setDailyBinaryEarning(member.getDailyBinaryEarning() + value);
+        member.setDailyBinaryEarning(Math.abs(member.getDailyBinaryEarning() + value));
         member.setLastEarned(new Date());
 
         if (member.getDailyBinaryEarning() >= dailyCapping) {
@@ -450,8 +450,8 @@ public class CommissionService {
         double toAvailableBalance = (80.0 / 100) * value;
         double toAwaitingWallet = value - toAvailableBalance;
 
-        member.setAvailableBalance(member.getAvailableBalance() + toAvailableBalance);
-        member.setAwaitingWallet(member.getAwaitingWallet() + toAwaitingWallet);
+        member.setAvailableBalance(Math.abs(member.getAvailableBalance() + toAvailableBalance));
+        member.setAwaitingWallet(Math.abs(member.getAwaitingWallet() + toAwaitingWallet));
         member.setLastEarned(new Date());
         memberRepository.save(member);
 
@@ -699,13 +699,13 @@ public class CommissionService {
         Member leftLeg = upLine.getLeftLeg();
 
         if (leftLeg != null && downLine.getId() == leftLeg.getId()) {
-            upLine.setTotalLeftBv(upLine.getTotalLeftBv() + bv);
-            upLine.setBinaryLeftPv(upLine.getBinaryLeftPv() + pv);
-            upLine.setMonthlyLeftPv(upLine.getMonthlyLeftPv() + pv);
+            upLine.setTotalLeftBv(Math.abs(upLine.getTotalLeftBv() + bv));
+            upLine.setBinaryLeftPv(Math.abs(upLine.getBinaryLeftPv() + pv));
+            upLine.setMonthlyLeftPv(Math.abs(upLine.getMonthlyLeftPv() + pv));
         } else {
-            upLine.setTotalRightBv(upLine.getTotalRightBv() + bv);
-            upLine.setBinaryRightPv(upLine.getBinaryRightPv() + pv);
-            upLine.setMonthlyRightPv(upLine.getMonthlyRightPv() + pv);
+            upLine.setTotalRightBv(Math.abs(upLine.getTotalRightBv() + bv));
+            upLine.setBinaryRightPv(Math.abs(upLine.getBinaryRightPv() + pv));
+            upLine.setMonthlyRightPv(Math.abs(upLine.getMonthlyRightPv() + pv));
         }
 
         memberRepository.save(upLine);
@@ -713,7 +713,7 @@ public class CommissionService {
     }
 
     private double addMonetaryValueToAvailableBalance(Member member, double amount) {
-        member.setAvailableBalance(member.getAvailableBalance() + amount);
+        member.setAvailableBalance(Math.abs(member.getAvailableBalance() + amount));
         member.setLastEarned(new Date());
         memberRepository.save(member);
 
