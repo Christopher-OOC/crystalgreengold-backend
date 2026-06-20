@@ -121,28 +121,20 @@ public class CommissionService {
             case "BASIC":
                 return switch (level) {
                     case 1 -> 30;
-                    case 2 -> 2;
+                    case 2 -> 3;
                     default -> 0;
                 };
             case "BRONZE":
                 return switch (level) {
                     case 1 -> 30;
-                    case 2 -> 2;
+                    case 2 -> 3;
                     case 3 -> 1;
                     default -> 0;
                 };
-            case "SILVER":
+            case "SILVER", "GOLD":
                 return switch (level) {
                     case 1 -> 30;
-                    case 2 -> 2;
-                    case 3 -> 1;
-                    case 4 -> 1;
-                    default -> 0;
-                };
-            case "GOLD":
-                return switch (level) {
-                    case 1 -> 30;
-                    case 2 -> 2;
+                    case 2 -> 3;
                     case 3 -> 1;
                     case 4 -> 1;
                     default -> 0;
@@ -150,7 +142,7 @@ public class CommissionService {
             case "DIAMOND":
                 return switch (level) {
                     case 1 -> 30;
-                    case 2 -> 2;
+                    case 2 -> 3;
                     case 3 -> 1;
                     case 4 -> 1;
                     case 5 -> 1;
@@ -159,7 +151,7 @@ public class CommissionService {
             case "PLATINUM":
                 return switch (level) {
                     case 1 -> 30;
-                    case 2 -> 2;
+                    case 2 -> 3;
                     case 3 -> 1;
                     case 4 -> 1;
                     case 5 -> 1;
@@ -374,16 +366,16 @@ public class CommissionService {
 
         // Level bonuses (Gen1-Gen15)
         Map<String, Integer> levelBonuses = new LinkedHashMap<>();
-        levelBonuses.put("Gen1", 7);
-        levelBonuses.put("Gen2", 5);
-        levelBonuses.put("Gen3", 4);
-        levelBonuses.put("Gen4", 4);
-        levelBonuses.put("Gen5", 3);
-        levelBonuses.put("Gen6", 3);
-        levelBonuses.put("Gen7", 3);
-        levelBonuses.put("Gen8", 2);
-        levelBonuses.put("Gen9", 2);
-        levelBonuses.put("Gen10", 2);
+        levelBonuses.put("Gen1", 30);
+        levelBonuses.put("Gen2", 1);
+        levelBonuses.put("Gen3", 1);
+        levelBonuses.put("Gen4", 1);
+        levelBonuses.put("Gen5", 1);
+        levelBonuses.put("Gen6", 1);
+        levelBonuses.put("Gen7", 1);
+        levelBonuses.put("Gen8", 1);
+        levelBonuses.put("Gen9", 1);
+        levelBonuses.put("Gen10", 1);
         levelBonuses.put("Gen11", 1);
         levelBonuses.put("Gen12", 1);
         levelBonuses.put("Gen13", 1);
