@@ -403,8 +403,7 @@ public class PaymentService {
     }
 
     private void transferToStoreOwner(Member store, double amount) {
-        if (!paystackVerifyPayment) {
-
+        if (paystackVerifyPayment) {
 
             TransferRecord transferRecord = new TransferRecord();
             transferRecord.setReason("You have a Topnivo purchase of " + amount);
