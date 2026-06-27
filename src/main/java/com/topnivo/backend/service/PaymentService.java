@@ -394,7 +394,13 @@ public class PaymentService {
         }
         else {
             if (store.getAccountDetails() != null) {
-                transferToStoreOwner(store, amount);
+                try {
+                    transferToStoreOwner(store, amount);
+                }
+                catch (Exception ex) {
+                    store.setAvailableBalance(store.getAvailableBalance() + amount);
+                    memberRepository.save(store);
+                }
             }
             else {
                 store.setAvailableBalance(store.getAvailableBalance() + amount);
