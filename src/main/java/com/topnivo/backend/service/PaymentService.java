@@ -397,7 +397,8 @@ public class PaymentService {
                 transferToStoreOwner(store, amount);
             }
             else {
-
+                store.setAvailableBalance(store.getAvailableBalance() + amount);
+                memberRepository.save(store);
             }
         }
     }
