@@ -976,7 +976,7 @@ public class MemberService {
         return returnValue;
     }
 
-    public Member adminUpdateMemberInfo(String memberId, MemberCreateRequest request) {
+    public Member adminUpdateMemberInfo(String memberId, MemberUpdateRequest request) {
         Member member = findMemberByMemberId(memberId);
 
         if (request.getLastName() != null) {
@@ -993,6 +993,9 @@ public class MemberService {
         }
         if (request.getAddress() != null) {
             member.setAddress(request.getAddress());
+        }
+        if (request.getBusinessName() != null) {
+            member.setBusinessName(request.getBusinessName());
         }
 
         return memberRepository.save(member);
