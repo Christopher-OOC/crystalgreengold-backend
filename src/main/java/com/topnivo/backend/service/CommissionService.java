@@ -315,56 +315,141 @@ public class CommissionService {
 
         switch (packageName) {
             case FREE, STARTER -> processEntryPackageUnilevel(member, totalBoughtPv);
-            case BASIC -> processBoosterPackageUnilevel(member, totalBoughtPv);
-            default -> processPremiumPackageUnilevel(member, totalBoughtPv);
+            case BASIC -> processBasicPackageUnilevel(member, totalBoughtPv);
+            case BRONZE -> processBronzePackageUnilevel(member, totalBoughtPv);
+            case SILVER -> processSilverPackageUnilevel(member, totalBoughtPv);
+            case GOLD -> processGoldPackageUnilevel(member, totalBoughtPv);
+            case PLATINUM -> processPlatinumPackageUnilevel(member, totalBoughtPv);
+            case DIAMOND -> processDiamondPackageUnilevel(member, totalBoughtPv);
         }
     }
 
     @Async
     private void processEntryPackageUnilevel(Member member, double totalBoughtPv) {
-        // Direct repurchase bonus (5%)
-        double prb = (5.0 / 100) * totalBoughtPv;
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
+        sendDirectRepurchaseBonus(member, prb);
+
+        // Level bonuses (Gen1-Gen3)
+        Map<String, Integer> levelBonuses = Map.of(
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1
+        );
+
+        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 3);
+    }
+
+    @Async
+    private void processBasicPackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
         sendDirectRepurchaseBonus(member, prb);
 
         // Level bonuses (Gen1-Gen5)
         Map<String, Integer> levelBonuses = Map.of(
-                "Gen1", 5,
-                "Gen2", 4,
-                "Gen3", 4,
-                "Gen4", 3,
-                "Gen5", 3
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1,
+                "Gen4", 1,
+                "Gen5", 1
         );
 
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 5);
     }
 
     @Async
-    private void processBoosterPackageUnilevel(Member member, double totalBoughtPv) {
-        // Direct repurchase bonus (8%)
-        double prb = (8.0 / 100) * totalBoughtPv;
+    private void processBronzePackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
+        sendDirectRepurchaseBonus(member, prb);
+
+        // Level bonuses (Gen1-Gen6)
+        Map<String, Integer> levelBonuses = Map.of(
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1,
+                "Gen4", 1,
+                "Gen5", 1,
+                "Gen6", 1
+        );
+
+        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 6);
+    }
+
+
+    @Async
+    private void processSilverPackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
         sendDirectRepurchaseBonus(member, prb);
 
         // Level bonuses (Gen1-Gen7)
         Map<String, Integer> levelBonuses = Map.of(
-                "Gen1", 5,
-                "Gen2", 5,
-                "Gen3", 4,
-                "Gen4", 4,
-                "Gen5", 3,
-                "Gen6", 3,
-                "Gen7", 3
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1,
+                "Gen4", 1,
+                "Gen5", 1,
+                "Gen6", 1,
+                "Gen7", 1
         );
 
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 7);
     }
 
     @Async
-    private void processPremiumPackageUnilevel(Member member, double totalBoughtPv) {
-        // Direct repurchase bonus (10%)
-        double prb = (10.0 / 100) * totalBoughtPv;
+    private void processGoldPackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
         sendDirectRepurchaseBonus(member, prb);
 
-        // Level bonuses (Gen1-Gen15)
+        // Level bonuses (Gen1-Gen9)
+        Map<String, Integer> levelBonuses = Map.of(
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1,
+                "Gen4", 1,
+                "Gen5", 1,
+                "Gen6", 1,
+                "Gen7", 1,
+                "Gen8", 1,
+                "Gen9", 1
+        );
+
+        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 9);
+    }
+
+    @Async
+    private void processPlatinumPackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
+        sendDirectRepurchaseBonus(member, prb);
+
+        // Level bonuses (Gen1-Gen10)
+        Map<String, Integer> levelBonuses = Map.of(
+                "Gen1", 1,
+                "Gen2", 1,
+                "Gen3", 1,
+                "Gen4", 1,
+                "Gen5", 1,
+                "Gen6", 1,
+                "Gen7", 1,
+                "Gen8", 1,
+                "Gen9", 1,
+                "Gen10", 1
+        );
+
+        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 10);
+    }
+
+    @Async
+    private void processDiamondPackageUnilevel(Member member, double totalBoughtPv) {
+        // Direct repurchase bonus (30%)
+        double prb = (30.0 / 100) * totalBoughtPv;
+        sendDirectRepurchaseBonus(member, prb);
+
+        // Level bonuses (Gen1-Gen12)
         Map<String, Integer> levelBonuses = new LinkedHashMap<>();
         levelBonuses.put("Gen1", 30);
         levelBonuses.put("Gen2", 1);
@@ -378,11 +463,8 @@ public class CommissionService {
         levelBonuses.put("Gen10", 1);
         levelBonuses.put("Gen11", 1);
         levelBonuses.put("Gen12", 1);
-        levelBonuses.put("Gen13", 1);
-        levelBonuses.put("Gen14", 1);
-        levelBonuses.put("Gen15", 1);
 
-        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 15);
+        distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 12);
     }
 
     @Async
@@ -447,7 +529,8 @@ public class CommissionService {
 
         double pvEquivalence = getAdminSettingValue(AdminSettings.PV_EQUIVALENCE);
         double value = roundToTwoDecimalPlaces(pvEquivalence * amountPv);
-        double toAvailableBalance = (80.0 / 100) * value;
+//        double toAvailableBalance = (80.0 / 100) * value;
+        double toAvailableBalance = value;
         double toAwaitingWallet = Math.abs(value - toAvailableBalance);
 
         member.setAvailableBalance(Math.abs(member.getAvailableBalance() + toAvailableBalance));
