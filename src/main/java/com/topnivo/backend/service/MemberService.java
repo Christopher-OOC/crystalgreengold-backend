@@ -369,14 +369,16 @@ public class MemberService {
     public Order activatePackageById(String memberId, int packageId, String storeId, String txnReference) throws MessagingException {
         Order returnOrder = null;
 
-        paymentService.checkPaymentValidity(txnReference);
-
         if (Objects.equals(storeId, "null") || storeId == null) {
             storeId = null;
         }
+
         Member member = findMemberByMemberId(memberId);
         Member store = memberRepository.findByMemberId(storeId);
         Package newPackage = packageService.findPackageById(packageId);
+
+        double amount = paymentService.checkPaymentValidity(txnReference);
+        paymentService.sendMoneyToStoreOwner(store, amount);
 
         List<Order> activateOrders = orderRepository.findByMemberAndOrderType(member, OrderType.ACTIVATE_PACKAGE);
 //        if (!activateOrders.isEmpty()) {

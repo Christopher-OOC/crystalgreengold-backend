@@ -24,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -213,7 +214,6 @@ public class PaymentService {
     }
 
     public void sendPayroll() {
-        checkIfAdminIsValid();
 
         List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.INITIALIZED);
         double totalPayout = transferRecords.stream().mapToDouble(t -> t.getMember().getAvailableBalance()).sum();
@@ -381,6 +381,67 @@ public class PaymentService {
 
         } catch (Exception ignored) {
 
+        }
+    }
+
+    @Transactional
+    public void sendMoneyToStoreOwner(Member store, double amount) {
+        if (store == null) {
+            Member admin = memberRepository.findByUsername("admin");
+            if (admin.getAccountDetails() != null) {
+                transferToStoreOwner(admin, amount);
+            }
+        }
+        else {
+            if (store.getAccountDetails() != null) {
+                transferToStoreOwner(store, amount);
+            }
+            else {
+
+            }
+        }
+    }
+
+    private void transferToStoreOwner(Member store, double amount) {
+        TransferRecord transferRecord = new TransferRecord();
+        transferRecord.setReason("You have a Topnivo purchase of " + amount);
+        transferRecord.setReference(TransactionUtils.generateReferenceId());
+        transferRecord.setMember(store);
+        transferRecord.setAmount(store.getAvailableBalance());
+        transferRecord.setStatus(TransferStatus.INITIALIZED);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + paystackPrivateKey);
+
+        Map<String, String> recipientPayload = new HashMap<>();
+        recipientPayload.put("type", store.getAccountDetails().getBankType());
+        recipientPayload.put("name", store.getLastName() + " " + store.getFirstName());
+        recipientPayload.put("account_number", store.getAccountDetails().getAccountNumber());
+        recipientPayload.put("bank_code", store.getAccountDetails().getBankCode());
+        recipientPayload.put("currency", store.getAccountDetails().getCurrency());
+
+        HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(recipientPayload, headers);
+
+        // create transfer recipient
+        try {
+            ResponseEntity<String> responseTransferRecipient =
+                    restTemplate.exchange(paystackTransferRecipientUrl, HttpMethod.POST, httpEntity, String.class);
+            Map<String, Object> responseMapTransferRecipient = objectMapper.readValue(responseTransferRecipient.getBody(), Map.class);
+            Map<String, Object> dataTransferRecipient = (Map<String, Object>) responseMapTransferRecipient.get("data");
+            boolean responseTransferRecipientStatus = (boolean) responseMapTransferRecipient.get("status");
+            String recipientCode = (String) dataTransferRecipient.get("recipient_code");
+            boolean responseActive = (boolean) dataTransferRecipient.get("active");
+
+            if (responseTransferRecipientStatus && responseActive && !Objects.isNull(recipientCode)) {
+                transferRecord.setRecipientCode(recipientCode);
+                transferRecordRepository.save(transferRecord);
+                // send pay
+
+                sendPayroll();
+            }
+        }
+        catch (Exception ignored) {
+            log.info("Cound not send money for: " + store.getUsername());
         }
     }
 }

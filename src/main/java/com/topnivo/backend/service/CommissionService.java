@@ -250,8 +250,8 @@ public class CommissionService {
 
         double binaryPvValue = (commissionRate / 100.0) * weakLegFactor;
 
-        member.setBinaryLeftPv(leftPv - weakLegFactor);
-        member.setBinaryRightPv(rightPv - weakLegFactor);
+        member.setBinaryLeftPv(Math.abs(leftPv - weakLegFactor));
+        member.setBinaryRightPv(Math.abs(rightPv - weakLegFactor));
 
         double value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(member, binaryPvValue);
 
@@ -448,7 +448,7 @@ public class CommissionService {
         double pvEquivalence = getAdminSettingValue(AdminSettings.PV_EQUIVALENCE);
         double value = roundToTwoDecimalPlaces(pvEquivalence * amountPv);
         double toAvailableBalance = (80.0 / 100) * value;
-        double toAwaitingWallet = value - toAvailableBalance;
+        double toAwaitingWallet = Math.abs(value - toAvailableBalance);
 
         member.setAvailableBalance(Math.abs(member.getAvailableBalance() + toAvailableBalance));
         member.setAwaitingWallet(Math.abs(member.getAwaitingWallet() + toAwaitingWallet));

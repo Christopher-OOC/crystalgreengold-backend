@@ -70,28 +70,28 @@ public class EmailService {
 
     @Async
     public void sendForgotPasswordEmail(String memberName, String email, String newPassword) throws MessagingException {
-//        MimeMessage mimeMessage = mailSender.createMimeMessage();
-//        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_RELATED, StandardCharsets.UTF_8.name());
-//        mimeMessageHelper.setFrom(fromEmail);
-//        final String templateName = EmailTemplates.FORGOT_PASSWORD_EMAIL.getTemplate();
-//        Map<String, Object> variables = new HashMap<>();
-//        variables.put("memberName", memberName);
-//        variables.put("password", newPassword);
-//
-//        Context context = new Context();
-//        context.setVariables(variables);
-//        mimeMessageHelper.setSubject(EmailTemplates.FORGOT_PASSWORD_EMAIL.getSubject());
-//
-//        try {
-//            String htmlTemplate = templateEngine.process(templateName, context);
-//            mimeMessageHelper.setText(htmlTemplate, true);
-//            mimeMessageHelper.setTo(email);
-//
-//            mailSender.send(mimeMessage);
-//        }
-//        catch (MessagingException ex) {
-//            throw new BadRequestException(ErrorMessages.INVALID_EMAIL);
-//        }
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_RELATED, StandardCharsets.UTF_8.name());
+        mimeMessageHelper.setFrom(fromEmail);
+        final String templateName = EmailTemplates.FORGOT_PASSWORD_EMAIL.getTemplate();
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("memberName", memberName);
+        variables.put("password", newPassword);
+
+        Context context = new Context();
+        context.setVariables(variables);
+        mimeMessageHelper.setSubject(EmailTemplates.FORGOT_PASSWORD_EMAIL.getSubject());
+
+        try {
+            String htmlTemplate = templateEngine.process(templateName, context);
+            mimeMessageHelper.setText(htmlTemplate, true);
+            mimeMessageHelper.setTo(email);
+
+            mailSender.send(mimeMessage);
+        }
+        catch (MessagingException ex) {
+            throw new BadRequestException(ErrorMessages.INVALID_EMAIL);
+        }
     }
 
     @Async
