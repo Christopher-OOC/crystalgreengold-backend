@@ -403,45 +403,48 @@ public class PaymentService {
     }
 
     private void transferToStoreOwner(Member store, double amount) {
-        TransferRecord transferRecord = new TransferRecord();
-        transferRecord.setReason("You have a Topnivo purchase of " + amount);
-        transferRecord.setReference(TransactionUtils.generateReferenceId());
-        transferRecord.setMember(store);
-        transferRecord.setAmount(store.getAvailableBalance());
-        transferRecord.setStatus(TransferStatus.INITIALIZED);
+        if (!paystackVerifyPayment) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + paystackPrivateKey);
 
-        Map<String, String> recipientPayload = new HashMap<>();
-        recipientPayload.put("type", store.getAccountDetails().getBankType());
-        recipientPayload.put("name", store.getLastName() + " " + store.getFirstName());
-        recipientPayload.put("account_number", store.getAccountDetails().getAccountNumber());
-        recipientPayload.put("bank_code", store.getAccountDetails().getBankCode());
-        recipientPayload.put("currency", store.getAccountDetails().getCurrency());
+            TransferRecord transferRecord = new TransferRecord();
+            transferRecord.setReason("You have a Topnivo purchase of " + amount);
+            transferRecord.setReference(TransactionUtils.generateReferenceId());
+            transferRecord.setMember(store);
+            transferRecord.setAmount(store.getAvailableBalance());
+            transferRecord.setStatus(TransferStatus.INITIALIZED);
 
-        HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(recipientPayload, headers);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + paystackPrivateKey);
 
-        // create transfer recipient
-        try {
-            ResponseEntity<String> responseTransferRecipient =
-                    restTemplate.exchange(paystackTransferRecipientUrl, HttpMethod.POST, httpEntity, String.class);
-            Map<String, Object> responseMapTransferRecipient = objectMapper.readValue(responseTransferRecipient.getBody(), Map.class);
-            Map<String, Object> dataTransferRecipient = (Map<String, Object>) responseMapTransferRecipient.get("data");
-            boolean responseTransferRecipientStatus = (boolean) responseMapTransferRecipient.get("status");
-            String recipientCode = (String) dataTransferRecipient.get("recipient_code");
-            boolean responseActive = (boolean) dataTransferRecipient.get("active");
+            Map<String, String> recipientPayload = new HashMap<>();
+            recipientPayload.put("type", store.getAccountDetails().getBankType());
+            recipientPayload.put("name", store.getLastName() + " " + store.getFirstName());
+            recipientPayload.put("account_number", store.getAccountDetails().getAccountNumber());
+            recipientPayload.put("bank_code", store.getAccountDetails().getBankCode());
+            recipientPayload.put("currency", store.getAccountDetails().getCurrency());
 
-            if (responseTransferRecipientStatus && responseActive && !Objects.isNull(recipientCode)) {
-                transferRecord.setRecipientCode(recipientCode);
-                transferRecordRepository.save(transferRecord);
-                // send pay
+            HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(recipientPayload, headers);
 
-                sendPayroll();
+            // create transfer recipient
+            try {
+                ResponseEntity<String> responseTransferRecipient =
+                        restTemplate.exchange(paystackTransferRecipientUrl, HttpMethod.POST, httpEntity, String.class);
+                Map<String, Object> responseMapTransferRecipient = objectMapper.readValue(responseTransferRecipient.getBody(), Map.class);
+                Map<String, Object> dataTransferRecipient = (Map<String, Object>) responseMapTransferRecipient.get("data");
+                boolean responseTransferRecipientStatus = (boolean) responseMapTransferRecipient.get("status");
+                String recipientCode = (String) dataTransferRecipient.get("recipient_code");
+                boolean responseActive = (boolean) dataTransferRecipient.get("active");
+
+                if (responseTransferRecipientStatus && responseActive && !Objects.isNull(recipientCode)) {
+                    transferRecord.setRecipientCode(recipientCode);
+                    transferRecordRepository.save(transferRecord);
+                    // send pay
+
+                    sendPayroll();
+                }
+            } catch (Exception ignored) {
+                log.info("Cound not send money for: " + store.getUsername());
             }
-        }
-        catch (Exception ignored) {
-            log.info("Cound not send money for: " + store.getUsername());
         }
     }
 }
