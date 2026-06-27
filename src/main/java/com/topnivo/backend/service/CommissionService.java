@@ -113,42 +113,7 @@ public class CommissionService {
                 sponsor.getCurrentPackage().getName();
 
         switch (packageName) {
-            case "FREE", "STARTER":
-                return switch (level) {
-                    case 1 -> 30;
-                    default -> 0;
-                };
-            case "BASIC":
-                return switch (level) {
-                    case 1 -> 30;
-                    case 2 -> 3;
-                    default -> 0;
-                };
-            case "BRONZE":
-                return switch (level) {
-                    case 1 -> 30;
-                    case 2 -> 3;
-                    case 3 -> 1;
-                    default -> 0;
-                };
-            case "SILVER", "GOLD":
-                return switch (level) {
-                    case 1 -> 30;
-                    case 2 -> 3;
-                    case 3 -> 1;
-                    case 4 -> 1;
-                    default -> 0;
-                };
-            case "DIAMOND":
-                return switch (level) {
-                    case 1 -> 30;
-                    case 2 -> 3;
-                    case 3 -> 1;
-                    case 4 -> 1;
-                    case 5 -> 1;
-                    default -> 0;
-                };
-            case "PLATINUM":
+            case "FREE", "STARTER", "BASIC", "BRONZE", "SILVER", "GOLD", "DIAMOND", "PLATINUM":
                 return switch (level) {
                     case 1 -> 30;
                     case 2 -> 3;
