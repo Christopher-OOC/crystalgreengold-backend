@@ -624,6 +624,9 @@ public class MemberService {
         Member store = memberRepository.findByMemberId(storeId);
         Package newPackage = packageService.findPackageById(packageId);
 
+        double amount = paymentService.checkPaymentValidity(txnReference);
+        paymentService.sendMoneyToStoreOwner(store, amount);
+
         if (storeId != null && store == null) {
             throw new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER + " (Store)");
         }

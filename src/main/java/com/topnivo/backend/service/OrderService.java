@@ -32,6 +32,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final StoreProductRepository storeProductRepository;
     private final CartItemRepository cartItemRepository;
+    private final PaymentService paymentService;
     private final CommissionService commissionService;
     private final EmailService emailService;
     private final TransactionRepository transactionRepository;
@@ -163,6 +164,9 @@ public class OrderService {
         }
         List<CartItem> cartItems = cartItemRepository.findByCartId(member.getCart().getId());
         cartItems.sort(Comparator.comparing(a -> a.getProduct().getId()));
+
+        double amount = paymentService.checkPaymentValidity(transactionReference);
+        paymentService.sendMoneyToStoreOwner(cartItems.get(0).getStore(), amount);
 
         if (cartItems.isEmpty()) {
             throw new BadRequestException(ErrorMessages.NO_PRODUCT_ORDER);
