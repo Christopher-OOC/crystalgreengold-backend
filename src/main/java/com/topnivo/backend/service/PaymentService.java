@@ -416,7 +416,7 @@ public class PaymentService {
             transferRecord.setReason("You have a Topnivo purchase of " + amount);
             transferRecord.setReference(TransactionUtils.generateReferenceId());
             transferRecord.setMember(store);
-            transferRecord.setAmount(store.getAvailableBalance());
+            transferRecord.setAmount(amount * 100);
             transferRecord.setStatus(TransferStatus.INITIALIZED);
 
             HttpHeaders headers = new HttpHeaders();
