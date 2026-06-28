@@ -1191,14 +1191,38 @@ public class MemberService {
 
     public Member addAccountDetails(String memberId, AccountDetailsRequest request) {
         Member member = findMemberByMemberId(memberId);
-        AccountDetails accountDetails = AccountDetails.builder()
-                .accountNumber(request.getAccountNumber())
-                .accountName(request.getAccountName())
-                .bankCode(request.getBankCode())
-                .bankName(request.getBankName())
-                .bankType(request.getBankType())
-                .currency(request.getCurrency())
-                .build();
+        AccountDetails accountDetails = null;
+        if (member.getAccountDetails() == null) {
+            accountDetails = AccountDetails.builder()
+                    .accountNumber(request.getAccountNumber())
+                    .accountName(request.getAccountName())
+                    .bankCode(request.getBankCode())
+                    .bankName(request.getBankName())
+                    .bankType(request.getBankType())
+                    .currency(request.getCurrency())
+                    .build();
+        }
+        else {
+            accountDetails = member.getAccountDetails();
+            if (request.getAccountNumber() != null && !request.getAccountNumber().isEmpty()) {
+                accountDetails.setAccountNumber(request.getAccountNumber());
+            }
+            if (request.getAccountName() != null && !request.getAccountName().isEmpty()) {
+                accountDetails.setAccountName(request.getAccountName());
+            }
+            if (request.getBankCode() != null && !request.getBankCode().isEmpty()) {
+                accountDetails.setBankCode(request.getBankCode());
+            }
+            if (request.getBankType() != null && !request.getBankType().isEmpty()) {
+                accountDetails.setBankType(request.getBankType());
+            }
+            if (request.getBankName() != null && !request.getBankName().isEmpty()) {
+                accountDetails.setBankName(request.getBankName());
+            }
+            if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
+                accountDetails.setCurrency(request.getCurrency());
+            }
+        }
 
         member.setAccountDetails(accountDetails);
         return memberRepository.save(member);
