@@ -494,7 +494,7 @@ public class CommissionService {
 
         double pvEquivalence = getAdminSettingValue(AdminSettings.PV_EQUIVALENCE);
         double value = roundToTwoDecimalPlaces(pvEquivalence * amountPv);
-        double toAvailableBalance = (90.0 / 100) * value;
+        double toAvailableBalance = (90.01 / 100) * value;
 //        double toAvailableBalance = value;
         double toAwaitingWallet = Math.abs(value - toAvailableBalance);
 
