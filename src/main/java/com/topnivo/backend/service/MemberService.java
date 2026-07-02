@@ -377,6 +377,7 @@ public class MemberService {
         Member store = memberRepository.findByMemberId(storeId);
         Package newPackage = packageService.findPackageById(packageId);
 
+
         double amount = paymentService.checkPaymentValidity(txnReference);
         paymentService.sendMoneyToStoreOwner(store, amount);
 

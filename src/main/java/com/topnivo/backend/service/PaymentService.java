@@ -62,6 +62,7 @@ public class PaymentService {
     private final TransactionRepository transactionRepository;
 
     public double checkPaymentValidity(String transactionReference) {
+        log.info("Checking Payment Validity for reference {}...", transactionReference);
         if (transactionReference == null || transactionReference.isBlank()) {
             throw new InvalidPaymentException(ErrorMessages.INVALID_PAYMENT);
         }
@@ -110,6 +111,8 @@ public class PaymentService {
             log.warn("Could not verify Paystack transaction reference {}", transactionReference, exception);
             throw new InvalidPaymentException(ErrorMessages.INVALID_PAYMENT);
         }
+
+        log.info("Confirmed amount of {}...", amount);
 
         return amount;
     }
@@ -389,13 +392,17 @@ public class PaymentService {
         if (store == null) {
             Member admin = memberRepository.findByUsername("admin");
             if (admin.getAccountDetails() != null) {
+                log.info("About to send money to details: {}",  admin.getAccountDetails());
                 transferToStoreOwner(admin, amount);
+                log.info("Successful transfer to details: {}",  admin.getAccountDetails());
             }
         }
         else {
             if (store.getAccountDetails() != null) {
                 try {
+                    log.info("About to send money to store details: {}",  store.getAccountDetails());
                     transferToStoreOwner(store, amount);
+                    log.info("Successful transfer to store details: {}",  store.getAccountDetails());
                 }
                 catch (Exception ex) {
                     store.setAvailableBalance(store.getAvailableBalance() + amount);
@@ -441,12 +448,16 @@ public class PaymentService {
                 String recipientCode = (String) dataTransferRecipient.get("recipient_code");
                 boolean responseActive = (boolean) dataTransferRecipient.get("active");
 
+                log.info("Recipient code gotten: {}", recipientCode);
+
                 if (responseTransferRecipientStatus && responseActive && !Objects.isNull(recipientCode)) {
+                    log.info("Creating transfer record...");
                     transferRecord.setRecipientCode(recipientCode);
                     transferRecordRepository.save(transferRecord);
                     // send pay
 
                     sendPayroll();
+                    log.info("Payment routed to the owner...");
                 }
             } catch (Exception ignored) {
                 log.info("Cound not send money for: " + store.getUsername());
