@@ -921,9 +921,11 @@ public class MemberService {
                     double toUpLine = (20 / 100.0) * pv;
                     double uniLevelPv = pv - toUpLine;
 
-                    commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, toUpLine);
-                    commissionService.sendServiceCenterBonus(store, boughtFromStore, pv);
-                    commissionService.sendUniLevelCommission(buyer, uniLevelPv);
+                    if (pv > 0) {
+                        commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, toUpLine);
+                        commissionService.sendServiceCenterBonus(store, boughtFromStore, pv);
+                        commissionService.sendUniLevelCommission(buyer, uniLevelPv);
+                    }
                 }
             }
 
