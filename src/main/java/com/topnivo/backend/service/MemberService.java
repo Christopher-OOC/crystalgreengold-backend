@@ -804,7 +804,9 @@ public class MemberService {
                     pv = newPackage.getPv() - oldPackage.getPv();
 
                     buyer.setCurrentPackage(newPackage);
-                    commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+                    if (pv > 0) {
+                        commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+                    }
 
                     if (storeRoleType != UserRoleType.ADMIN) {
                         if (storePackage != null) {

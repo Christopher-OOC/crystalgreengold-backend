@@ -446,7 +446,7 @@ public class CommissionService {
         tryGivingRankToMember(member);
 
         double pvEquivalence = getAdminSettingValue(AdminSettings.PV_EQUIVALENCE);
-        double value = roundToTwoDecimalPlaces(pvEquivalence * amountPv);
+        double value = roundToTwoDecimalPlaces(pvEquivalence *  Math.abs(amountPv));
         double toAvailableBalance = (80.0 / 100) * value;
         double toAwaitingWallet = Math.abs(value - toAvailableBalance);
 
@@ -751,7 +751,7 @@ public class CommissionService {
     private void createCommissionRecord(Member member, double amount, String description, CommissionType commissionType) {
         EarningCommission commission = new EarningCommission();
         commission.setMemberId(member.getMemberId());
-        commission.setAmount(amount);
+        commission.setAmount( Math.abs(amount));
         commission.setDescription(description);
         commission.setEarnedDate(LocalDateTime.now());
         commission.setCommissionType(commissionType);
