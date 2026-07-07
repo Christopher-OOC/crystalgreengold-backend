@@ -846,7 +846,9 @@ public class MemberService {
                     commissionService.sendServiceCenterBonus(store, boughtFromStore, pv);
                 }
 
-                commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, pv);
+                if (pv > 0) {
+                    commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, pv);
+                }
 
             } else if (order.getOrderType() == OrderType.BUY_PRODUCT) {
                 List<OrderItem> orderItems = order.getOrderItems();
