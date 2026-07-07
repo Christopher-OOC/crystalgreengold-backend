@@ -33,7 +33,7 @@ public class PaymentController {
     private final MemberMapper memberMapper;
     private final ModelMapper modelMapper;
 
-    @GetMapping(value = "/all-banks")
+    @GetMapping(value = "")
     public ResponseEntity<?> getAllBanks() {
         List<Map<String, String>> allBanks = paymentService.findAllBanks();
         ApiResponse<List<Map<String, String>>> response = new ApiResponse<>(

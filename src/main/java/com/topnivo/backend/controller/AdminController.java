@@ -4,7 +4,7 @@ import com.topnivo.backend.mapper.MemberMapper;
 import com.topnivo.backend.model.entity.AdminSetting;
 import com.topnivo.backend.model.entity.Member;
 import com.topnivo.backend.model.request.AdminSettingUpdateRequest;
-import com.topnivo.backend.model.request.MemberCreateRequest;
+import com.topnivo.backend.model.request.MemberUpdateRequest;
 import com.topnivo.backend.model.response.ApiResponse;
 import com.topnivo.backend.model.response.MemberResponse;
 import com.topnivo.backend.model.response.ResponseStatus;
@@ -52,7 +52,7 @@ public class AdminController {
     @PutMapping(value = "/update-member-info/{memberId}")
     public ResponseEntity<?> updateMemberInfo(
             @PathVariable("memberId") String memberId,
-            @RequestBody MemberCreateRequest request
+            @RequestBody MemberUpdateRequest request
             ) {
         Member member = memberService.adminUpdateMemberInfo(memberId, request);
         MemberResponse memberResponse = memberMapper.memberToResponse(member);

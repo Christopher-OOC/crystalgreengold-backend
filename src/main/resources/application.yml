@@ -6,12 +6,12 @@ spring:
   application:
     name: topnivo-backend
   datasource:
-#      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/crystalgreengold_db
-#      username: chris
-#      password: Chris@24
-    url: jdbc:postgresql://localhost:5432/postgres?createDatabaseIfNotExists=true
-    username: postgres
-    password: chris
+      url: jdbc:postgresql://postgresql-210122-0.cloudclusters.net:19996/crystalgreengold_db
+      username: chris
+      password: Chris@24
+#    url: jdbc:postgresql://localhost:5432/postgres?createDatabaseIfNotExists=true
+#    username: postgres
+#    password: chris
   jpa:
     showSql: true
     hibernate:
