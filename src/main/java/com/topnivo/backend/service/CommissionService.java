@@ -416,7 +416,7 @@ public class CommissionService {
 
         // Level bonuses (Gen1-Gen12)
         Map<String, Integer> levelBonuses = new LinkedHashMap<>();
-        levelBonuses.put("Gen1", 30);
+        levelBonuses.put("Gen1", 1);
         levelBonuses.put("Gen2", 1);
         levelBonuses.put("Gen3", 1);
         levelBonuses.put("Gen4", 1);
