@@ -74,6 +74,8 @@ public class Member {
     private double monthlyRightPv;
     @Column(columnDefinition = "DECIMAL(19,2)")
     private double monthlySalesPv;
+    @Column(columnDefinition = "DECIMAL(19,2)")
+    private double accumulatedPv;
     private int countNewlyRegisteredOnMonthlyWeakerLeg;
     @Column(columnDefinition = "DECIMAL(19,2)")
     private double availableBalance;

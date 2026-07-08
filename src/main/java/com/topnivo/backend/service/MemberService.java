@@ -847,8 +847,10 @@ public class MemberService {
                 }
 
                 if (pv > 0) {
+                    buyer.setAccumulatedPv(buyer.getAccumulatedPv() + pv);
                     commissionService.addBinaryBvAndPvToAllUpLines(buyer, bv, pv);
                 }
+
 
             } else if (order.getOrderType() == OrderType.BUY_PRODUCT) {
                 List<OrderItem> orderItems = order.getOrderItems();
@@ -927,6 +929,8 @@ public class MemberService {
                         commissionService.sendUniLevelCommission(buyer, uniLevelPv);
                     }
                 }
+
+                buyer.setAccumulatedPv(buyer.getAccumulatedPv() + pv);
             }
 
             List<Transaction> transactions = transactionRepository.findByOrderId(orderId);
@@ -1006,6 +1010,10 @@ public class MemberService {
         }
 
         return memberRepository.save(member);
+    }
+
+    public Map<String, Object> adminActivateUserPackage(String memberId, int packageId) {
+        return null;
     }
 
     public enum UserRoleType {
@@ -1246,6 +1254,10 @@ public class MemberService {
         result.put("leftLeg", getMemberLittleResponse(memberResponse.getLeftLegId()));
         result.put("rightLeg", getMemberLittleResponse(memberResponse.getRightLegId()));
         result.put("promos", getEarnedPromotions(member));
+
+        if (determineUserRoleType() == UserRoleType.ADMIN) {
+            result.put("accumulatedPvs", memberRepository.getTotalAccumulatedPv());
+        }
 
         return result;
     }

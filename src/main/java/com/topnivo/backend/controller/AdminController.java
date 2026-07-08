@@ -137,4 +137,21 @@ public class AdminController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping(value = "/{memberId}/activate-package/{packageId}")
+    public ResponseEntity<?> adminActivateUserPackage(
+            @PathVariable("memberId") String memberId,
+            @PathVariable("packageId") int packageId
+    ) {
+        Map<String, Object> data = memberService.adminActivateUserPackage(memberId, packageId);
+        ApiResponse<Map<String, Object>> response = new ApiResponse<>(
+                ResponseStatus.SUCCESS.name(),
+                "Admin setting retrieved successfully!",
+                data,
+                null
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

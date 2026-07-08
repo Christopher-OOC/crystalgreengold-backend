@@ -279,4 +279,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     AND m.enabled = :enabled
     """)
     Page<Member> findByEmailOrUserNameOrFirstNameOrLastNameAndRoleAndEnabled(@Param("search") String search, @Param("roleName") String roleName, @Param("enabled") boolean isEnabled, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(m.accumulatedPv), 0) FROM Member m")
+    Double getTotalAccumulatedPv();
+
 }
