@@ -366,7 +366,8 @@ public class MemberService {
         return rootNode;
     }
 
-    public Order activatePackageById(String memberId, int packageId, String storeId, String txnReference) throws MessagingException {
+    @Transactional
+    public Order activatePackageByAdmin(String memberId, int packageId, String storeId, String txnReference) throws MessagingException {
         Order returnOrder = null;
 
         if (Objects.equals(storeId, "null") || storeId == null) {
@@ -404,6 +405,48 @@ public class MemberService {
                 returnOrder = upgradePackage(member, store, newPackage, roleType);
             }
         } else {
+            throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
+        }
+
+        member.setLastActive(LocalDateTime.now());
+        return returnOrder;
+    }
+
+    @Transactional
+    public Order activatePackageByAdmin(String memberId, int packageId, String storeId) throws MessagingException {
+        Order returnOrder = null;
+
+        if (Objects.equals(storeId, "null") || storeId == null) {
+            storeId = null;
+        }
+
+        Member member = findMemberByMemberId(memberId);
+        Member store = memberRepository.findByMemberId(storeId);
+        Package newPackage = packageService.findPackageById(packageId);
+
+        List<Order> activateOrders = orderRepository.findByMemberAndOrderType(member, OrderType.ACTIVATE_PACKAGE);
+//        if (!activateOrders.isEmpty()) {
+//           for (Order order : activateOrders) {
+//               if (order.getTransaction().getStatus() == TransactionStatus.NOT_CONFIRMED) {
+//                  throw new BadRequestException(ErrorMessages.CANNOT_ACTIVATE_PACKAGE_AGAIN);
+//               }
+//           }
+//        }
+
+        validateSponsorAndPlacer(member);
+        validatePackage(newPackage);
+
+        UserRoleType adminType = determineUserRoleType();
+        UserRoleType userRoleType = determineUserRoleType(member);
+
+        if (adminType == UserRoleType.ADMIN) {
+            if (member.getCurrentPackage() == null) {
+                returnOrder = activateNewPackage(member, store, newPackage, userRoleType);
+            } else {
+                returnOrder = upgradePackage(member, store, newPackage, userRoleType);
+            }
+        }
+        else {
             throw new BadRequestException(ErrorMessages.INVALID_OPERATION);
         }
 
@@ -613,6 +656,7 @@ public class MemberService {
         return order;
     }
 
+    @Transactional
     public Order buyPackageById(String memberId, int packageId, String storeId, int quantity, String txnReference) throws MessagingException {
         Order order = null;
 
@@ -754,7 +798,7 @@ public class MemberService {
 
         Member buyer = order.getMember();
         Member store = order.getStore();
-        UserRoleType storeRoleType = determineUserRoleType();
+        UserRoleType storeRoleType = determineUserRoleType(buyer);
         Member boughtFromStore = null;
 
         if (store == null) {
@@ -966,6 +1010,16 @@ public class MemberService {
         return UserRoleType.fromString(role);
     }
 
+    private UserRoleType determineUserRoleType(Member member) {
+        String role = member.getRoles().stream()
+                .map(Role::getName)
+                .filter(r -> !r.equals("ROLE_REGULAR_MEMBER"))
+                .findFirst()
+                .orElse("ROLE_REGULAR_MEMBER");
+
+        return UserRoleType.fromString(role);
+    }
+
     public Member updateMemberCanReceivePayment(String memberId, boolean canReceivePayment) {
         Member member = findMemberByMemberId(memberId);
         member.setCanReceivePayment(canReceivePayment);
@@ -1012,8 +1066,31 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public Map<String, Object> adminActivateUserPackage(String memberId, int packageId) {
-        return null;
+    public Order adminActivateUserPackage(String memberId, int packageId) throws MessagingException {
+        Member member = findMemberByMemberId(memberId);
+        packageService.findPackageById(packageId);
+
+        String memberRole = member.getRoles().stream()
+                .map(Role::getName)
+                .filter(r -> !r.equals("ROLE_REGULAR_MEMBER"))
+                .findFirst()
+                .orElse("ROLE_REGULAR_MEMBER");
+
+        Member premiumStore = findMemberByUsername("premium-store");
+        Member serviceCenter = findMemberByUsername("cggl");
+
+        if (memberRole.equals("ROLE_REGULAR_MEMBER")) {
+            return activatePackageByAdmin(memberId, packageId, serviceCenter.getMemberId());
+        }
+        else if (memberRole.equals("ROLE_SERVICE_CENTER")) {
+            return activatePackageByAdmin(memberId, packageId, premiumStore.getMemberId());
+        }
+        else if (memberRole.equals("ROLE_PREMIUM_STORE")) {
+            return activatePackageByAdmin(memberId, packageId, null);
+        }
+        else {
+            throw new NoSuchResourceException("Invalid role to purchase package");
+        }
     }
 
     public enum UserRoleType {

@@ -179,7 +179,7 @@ public class MemberController {
             @RequestBody ActivatePackageRequest request
     ) throws MessagingException {
 
-        Order order = memberService.activatePackageById(memberId, request.getPackageId(), request.getStoreId(), request.getTxnReference());
+        Order order = memberService.activatePackageByAdmin(memberId, request.getPackageId(), request.getStoreId(), request.getTxnReference());
         Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
         MemberResponse memberResponse = memberMapper.memberToResponse(member);
         ApiResponse<MemberResponse> response = new ApiResponse<>(

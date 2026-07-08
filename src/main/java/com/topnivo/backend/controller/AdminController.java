@@ -3,6 +3,7 @@ package com.topnivo.backend.controller;
 import com.topnivo.backend.mapper.MemberMapper;
 import com.topnivo.backend.model.entity.AdminSetting;
 import com.topnivo.backend.model.entity.Member;
+import com.topnivo.backend.model.entity.Order;
 import com.topnivo.backend.model.request.AdminSettingUpdateRequest;
 import com.topnivo.backend.model.request.MemberUpdateRequest;
 import com.topnivo.backend.model.response.ApiResponse;
@@ -10,6 +11,7 @@ import com.topnivo.backend.model.response.MemberResponse;
 import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.service.AdminSettingService;
 import com.topnivo.backend.service.MemberService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -139,16 +141,18 @@ public class AdminController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping(value = "/{memberId}/activate-package/{packageId}")
+    @PutMapping(value = "/{memberId}/activate-package/{packageId}")
     public ResponseEntity<?> adminActivateUserPackage(
             @PathVariable("memberId") String memberId,
             @PathVariable("packageId") int packageId
-    ) {
-        Map<String, Object> data = memberService.adminActivateUserPackage(memberId, packageId);
-        ApiResponse<Map<String, Object>> response = new ApiResponse<>(
-                ResponseStatus.SUCCESS.name(),
-                "Admin setting retrieved successfully!",
-                data,
+    ) throws MessagingException {
+        Order order = memberService.adminActivateUserPackage(memberId, packageId);
+        Member member = memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
+        MemberResponse memberResponse = memberMapper.memberToResponse(member);
+        ApiResponse<MemberResponse> response = new ApiResponse<>(
+                ResponseStatus.ACTIVATED.name(),
+                "Package activated successfully!",
+                memberResponse,
                 null
         );
 
