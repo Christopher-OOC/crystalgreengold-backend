@@ -26,4 +26,13 @@ public class TestController {
 
     }
 
+    @GetMapping(value = "/try-rank")
+    public String sendRank() {
+        commissionService.sendRank();
+        return "SUCCESS";
+
+    }
+
+
+
 }

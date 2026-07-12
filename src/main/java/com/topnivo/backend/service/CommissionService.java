@@ -510,56 +510,62 @@ public class CommissionService {
         return Math.round(value * 100.0) / 100.0;
     }
 
-    @Async
+    @Transactional
     public void tryGivingRankToMember(Member member) {
         if (member == null) {
             return;
         }
 
-        List<Rank> ranks = rankRepository.findAll();
-        ranks.sort(Comparator.comparingInt(Rank::getRankValue));
+        List<Rank> ranks = rankRepository.findAllByOrderByRankValueAsc();
+
         double weakLegBv = Math.min(member.getTotalLeftBv(), member.getTotalRightBv());
-        Rank memberRank = member.getRank();
+
+        Rank qualifiedRank = member.getRank();
 
         for (Rank rank : ranks) {
-            if (memberRank != null) {
-                if (weakLegBv >= rank.getQualifyingBv() && memberRank.getPrize() < rank.getPrize()) {
-                    memberRank = rank;
-                }
+            if (weakLegBv >= rank.getQualifyingBv()) {
+                qualifiedRank = rank;
             } else {
-                if (weakLegBv >= rank.getQualifyingBv()) {
-                    memberRank = rank;
-                }
+                break;
             }
         }
 
-        double value = 0;
-        if (memberRank != null) {
-            if (member.getRank() != null) {
-                if (member.getRank().getId() != memberRank.getId()) {
-                    member.setRank(memberRank);
-                    value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(member, memberRank.getPrize());
-                    memberRepository.save(member);
-                    createCommissionRecord(member,
-                            value,
-                            "You have earned " + value + " by getting Rank ( " + memberRank.getName() + ")!",
-                            CommissionType.RANK_COMMISSION);
-                    sendLeadershipCelebrationBonus(member, memberRank.getPrize());
-                }
-            } else {
-                member.setRank(memberRank);
-                value = addMonetaryValueToAvailableBalance(member, memberRank.getPrize());
-                memberRepository.save(member);
-                createCommissionRecord(member,
-                        value,
-                        "You have earned " + value + " by getting Rank ( " + memberRank.getName() + ")!",
-                        CommissionType.RANK_COMMISSION);
-                sendLeadershipCelebrationBonus(member, memberRank.getPrize());
-            }
+        if (qualifiedRank == null) {
+            return;
         }
+
+        if (member.getRank() != null &&
+                Objects.equals(member.getRank().getId(), qualifiedRank.getId())) {
+            return;
+        }
+
+        if (member.getRank() != null &&
+                member.getRank().getRankValue() >= qualifiedRank.getRankValue()) {
+            return;
+        }
+
+        member.setRank(qualifiedRank);
+
+        double value;
+
+        if (member.getRank() == null) {
+            value = addMonetaryValueToAvailableBalance(member, qualifiedRank.getPrize());
+        } else {
+            value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(member, qualifiedRank.getPrize());
+        }
+
+        memberRepository.save(member);
+
+        createCommissionRecord(
+                member,
+                value,
+                "You have earned " + value + " by getting Rank (" + qualifiedRank.getName() + ")!",
+                CommissionType.RANK_COMMISSION
+        );
+
+        sendLeadershipCelebrationBonus(member, qualifiedRank.getPrize());
     }
 
-    @Async
     public void sendLeadershipCelebrationBonus(Member member, double amount) {
         if (member == null) {
             return;
@@ -572,7 +578,6 @@ public class CommissionService {
         }
     }
 
-    @Async
     public void sendLeadershipCelebrationBonusToSponsor(Member sponsor, double amount, double percentage) {
         if (sponsor == null) {
             return;
@@ -756,7 +761,7 @@ public class CommissionService {
             upLine.setMonthlyRightPv(Math.abs(upLine.getMonthlyRightPv() + pv));
         }
 
-        memberRepository.save(upLine);
+        upLine = memberRepository.save(upLine);
         tryGivingRankToMember(upLine);
     }
 
@@ -912,5 +917,11 @@ public class CommissionService {
         sendLeadershipBonus();
         sendHighestHonoraryBonus();
         resetMemberAtTheEndOfTheMonth();
+    }
+
+    public void sendRank() {
+        for (Member member : memberRepository.findAll()) {
+            tryGivingRankToMember(member);
+        }
     }
 }
