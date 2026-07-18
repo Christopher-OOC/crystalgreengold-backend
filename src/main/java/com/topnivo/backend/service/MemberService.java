@@ -822,7 +822,6 @@ public class MemberService {
                 double bv;
                 double pv;
 
-
                 StorePackage storePackage = storePackageRepository.findByStoreAndPac(store, newPackage);
 
                 if (storePackage != null) {
@@ -834,8 +833,10 @@ public class MemberService {
                     pv = newPackage.getPv();
 
                     buyer.setCurrentPackage(newPackage);
-                    commissionService.updateSponsorNewRegistrationCount(buyer);
-                    commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+                    if (pv > 0) {
+                        commissionService.updateSponsorNewRegistrationCount(buyer);
+                        commissionService.sendDirectAndIndirectReferralCommission(buyer, pv);
+                    }
 
                     if (storeRoleType != UserRoleType.ADMIN) {
                         if (storePackage != null) {
