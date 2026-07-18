@@ -283,4 +283,7 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     @Query("SELECT COALESCE(SUM(m.accumulatedPv), 0) FROM Member m")
     Double getTotalAccumulatedPv();
 
+    @Query("SELECT SUM(m.availableBalance) FROM Member m")
+    Double getTotalAvailableBalance();
+
 }

@@ -1334,6 +1334,7 @@ public class MemberService {
 
         if (determineUserRoleType() == UserRoleType.ADMIN) {
             result.put("accumulatedPvs", memberRepository.getTotalAccumulatedPv());
+            result.put("unpaidBalance", memberRepository.getTotalAvailableBalance());
         }
 
         return result;

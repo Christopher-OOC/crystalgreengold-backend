@@ -23,7 +23,6 @@ public class TestController {
         commissionService.sendUpLineBinaryCommission(member);
 
         return "SUCCESS";
-
     }
 
     @GetMapping(value = "/try-rank")
@@ -32,7 +31,5 @@ public class TestController {
         return "SUCCESS";
 
     }
-
-
 
 }
