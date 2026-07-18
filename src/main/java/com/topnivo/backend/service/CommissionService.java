@@ -234,8 +234,10 @@ public class CommissionService {
         sendMatchingCommission(member, binaryPvValue);
     }
 
-    @Async
     private void sendMatchingCommission(Member member, double amountPv) {
+        if (amountPv == 0) {
+            return;
+        }
         Member level1Sponsor = member.getSponsor();
         if (level1Sponsor != null) {
             sendMatchingCommissionForLevel(level1Sponsor, amountPv, 1, AdminSettings.MATCHING_COMMISSION_LEVEL_1);
@@ -251,7 +253,6 @@ public class CommissionService {
         }
     }
 
-    @Async
     private void sendMatchingCommissionForLevel(Member sponsor, double amountPv, int level, AdminSettings setting) {
         if (sponsor == null) {
             return;
@@ -259,6 +260,11 @@ public class CommissionService {
 
         double commissionRate = getAdminSettingValue(setting);
         double commissionAmount = (commissionRate / 100.0) * amountPv;
+
+        if (commissionAmount == 0) {
+            return;
+        }
+
         double value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(sponsor, commissionAmount);
         createCommissionRecord(
                 sponsor,
@@ -268,7 +274,6 @@ public class CommissionService {
         );
     }
 
-    @Async
     public void sendUniLevelCommission(Member member, double totalBoughtPv) {
         if (member == null) {
             return;
@@ -289,7 +294,6 @@ public class CommissionService {
         }
     }
 
-    @Async
     private void processEntryPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -305,7 +309,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 3);
     }
 
-    @Async
     private void processBasicPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -323,7 +326,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 5);
     }
 
-    @Async
     private void processBronzePackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -342,8 +344,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 6);
     }
 
-
-    @Async
     private void processSilverPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -363,7 +363,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 7);
     }
 
-    @Async
     private void processGoldPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -385,7 +384,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 9);
     }
 
-    @Async
     private void processPlatinumPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -408,7 +406,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 10);
     }
 
-    @Async
     private void processDiamondPackageUnilevel(Member member, double totalBoughtPv) {
         // Direct repurchase bonus (30%)
         double prb = (30.0 / 100) * totalBoughtPv;
@@ -432,7 +429,6 @@ public class CommissionService {
         distributeUnilevelCommissions(member, totalBoughtPv, levelBonuses, 12);
     }
 
-    @Async
     private void distributeUnilevelCommissions(Member member, double totalBoughtPv,
                                                Map<String, Integer> levelBonuses, int maxLevel) {
         Member sponsor = member.getSponsor();
@@ -447,7 +443,6 @@ public class CommissionService {
         }
     }
 
-    @Async
     private void sendDirectRepurchaseBonus(Member member, double prb) {
         if (member == null) {
             return;
