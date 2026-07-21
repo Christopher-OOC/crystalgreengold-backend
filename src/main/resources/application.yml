@@ -58,6 +58,18 @@ paystack:
     transferRecipient: https://api.paystack.co/transferrecipient
     transferBulk: https://api.paystack.co/transfer/bulk
     balance: https://api.paystack.co/balance
+flutterwave:
+  clientId: ${FLW_CLIENT_ID:}
+  clientSecret: ${FLW_CLIENT_SECRET:}
+  verifyPayment: ${FLW_VERIFY_PAYMENT:false}
+  v3SecretKey: ${FLW_V3_SECRET_KEY:}
+  url:
+    token: https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token
+    banks: https://developersandbox-api.flutterwave.com/banks
+    transactionVerifyV3: https://api.flutterwave.com/v3/transactions/verify
+    walletBalance: https://developersandbox-api.flutterwave.com/wallets/balances
+    directTransfer: https://developersandbox-api.flutterwave.com/direct-transfers
+    transferGet: https://developersandbox-api.flutterwave.com/transfers
 
 #
 #server:
