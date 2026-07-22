@@ -623,7 +623,6 @@ public class CommissionService {
     }
 
     private void createEarnedPromotion(Member member, Promotion promotion) {
-
         EarnedPromotion earnedPromotion = new EarnedPromotion();
         earnedPromotion.setName(promotion.getName());
         earnedPromotion.setDescription(promotion.getDescription());

@@ -48,7 +48,7 @@ public class FlutterwavePaymentService {
     private String flwTokenUrl;
     @Value("${flutterwave.url.banks:https://developersandbox-api.flutterwave.com/banks}")
     private String flwBanksUrl;
-    @Value("${flutterwave.url.transactionVerifyV3:https://api.flutterwave.com/v3/transactions/verify}")
+    @Value("${flutterwave.url.transactionVerifyV3:https://api.flutterwave.com/v3/transactions/{refId}/verify}")
     private String flwTransactionVerifyUrl;
     @Value("${flutterwave.url.walletBalance:https://developersandbox-api.flutterwave.com/wallets/balances}")
     private String flwWalletBalanceUrl;
@@ -121,7 +121,7 @@ public class FlutterwavePaymentService {
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + flwV3SecretKey);
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
 
-        String url = flwTransactionVerifyUrl + "?tx_ref=" + transactionReference;
+        String url = flwTransactionVerifyUrl.replace("{refId}", transactionReference);
         double amount = 0;
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
@@ -165,7 +165,7 @@ public class FlutterwavePaymentService {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-        String url = flwBanksUrl + "?country=NG";
+        String url = flwBanksUrl + "?country=N";
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
