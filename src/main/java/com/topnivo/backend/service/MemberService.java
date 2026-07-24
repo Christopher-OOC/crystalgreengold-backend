@@ -798,7 +798,7 @@ public class MemberService {
 
         Member buyer = order.getMember();
         Member store = order.getStore();
-        UserRoleType storeRoleType = determineUserRoleType(buyer);
+        UserRoleType storeRoleType = determineUserRoleType(store);
         Member boughtFromStore = null;
 
         if (store == null) {
