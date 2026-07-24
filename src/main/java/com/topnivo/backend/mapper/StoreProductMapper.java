@@ -15,6 +15,7 @@ public class StoreProductMapper {
 
     public StoreProductResponse storeProductToResponse(StoreProduct storeProduct) {
         StoreProductResponse response = modelMapper.map(storeProduct, StoreProductResponse.class);
+        response.getProduct().setAvailableQuantity(storeProduct.getBoughtQuantity());
         // Create a store response
         StoreResponse storeResponse = StoreResponse
                 .builder()

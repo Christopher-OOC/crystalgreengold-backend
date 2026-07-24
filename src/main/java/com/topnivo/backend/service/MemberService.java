@@ -798,7 +798,7 @@ public class MemberService {
 
         Member buyer = order.getMember();
         Member store = order.getStore();
-        UserRoleType storeRoleType = determineUserRoleType(buyer);
+        UserRoleType storeRoleType = determineUserRoleType(store);
         Member boughtFromStore = null;
 
         if (store == null) {
@@ -1012,6 +1012,10 @@ public class MemberService {
     }
 
     private UserRoleType determineUserRoleType(Member member) {
+        if (member == null) {
+            return null;
+        }
+
         String role = member.getRoles().stream()
                 .map(Role::getName)
                 .filter(r -> !r.equals("ROLE_REGULAR_MEMBER"))
