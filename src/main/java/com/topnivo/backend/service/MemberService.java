@@ -75,7 +75,7 @@ public class MemberService {
     }
 
     private void validateUsernameAvailability(String username) {
-        if (memberRepository.findByUsername(username) != null) {
+        if (memberRepository.findByUsernameIgnoreCase(username) != null) {
             throw new ResourceAlreadyExistException(ErrorMessages.MEMBER_ALREADY_EXIST);
         }
     }
@@ -226,13 +226,13 @@ public class MemberService {
     }
 
     public Member findMemberByUsername(String username) {
-        return Optional.ofNullable(memberRepository.findByUsername(username))
+        return Optional.ofNullable(memberRepository.findByUsernameIgnoreCase(username))
                 .orElseThrow(() -> new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER));
     }
 
     public Member findEligibleSponsorByUsername(String username) {
         String memberUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member sponsor = memberRepository.findByUsername(username);
+        Member sponsor = memberRepository.findByUsernameIgnoreCase(username);
 
         if (sponsor == null) {
             throw new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER);

@@ -41,7 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         final String refreshToken = this.jwtService.generateRefreshToken(user.getUsername());
         final String tokenType = "Bearer";
 
-        final Member member = memberRepository.findByUsername(user.getUsername());
+        final Member member = memberRepository.findByUsernameIgnoreCase(user.getUsername());
 
         return AuthenticationResponse
                 .builder()

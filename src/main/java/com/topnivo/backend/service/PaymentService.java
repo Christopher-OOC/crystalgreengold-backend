@@ -324,7 +324,7 @@ public class PaymentService {
         boolean isAdminSuperAdmin = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
         String adminUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member admin = memberRepository.findByUsername(adminUserName);
+        Member admin = memberRepository.findByUsernameIgnoreCase(adminUserName);
         if (admin == null) {
             throw new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER);
         }
@@ -390,7 +390,7 @@ public class PaymentService {
     @Transactional
     public void sendMoneyToStoreOwner(Member store, double amount) {
         if (store == null) {
-            Member admin = memberRepository.findByUsername("admin");
+            Member admin = memberRepository.findByUsernameIgnoreCase("admin");
             if (admin.getAccountDetails() != null) {
                 log.info("About to send money to details: {}",  admin.getAccountDetails());
                 transferToStoreOwner(admin, amount);

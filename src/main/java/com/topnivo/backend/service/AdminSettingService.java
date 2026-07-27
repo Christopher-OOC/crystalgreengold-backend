@@ -3,7 +3,6 @@ package com.topnivo.backend.service;
 import com.topnivo.backend.exception.exception.BadRequestException;
 import com.topnivo.backend.exception.exception.ErrorMessages;
 import com.topnivo.backend.exception.exception.NoSuchResourceException;
-import com.topnivo.backend.model.constant.AdminSettings;
 import com.topnivo.backend.model.entity.AdminSetting;
 import com.topnivo.backend.model.entity.Member;
 import com.topnivo.backend.model.request.AdminSettingUpdateRequest;
@@ -61,7 +60,7 @@ public class AdminSettingService {
         boolean isAdminSuperAdmin = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
         String adminUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member admin = memberRepository.findByUsername(adminUserName);
+        Member admin = memberRepository.findByUsernameIgnoreCase(adminUserName);
         if (admin == null) {
             throw new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER);
         }

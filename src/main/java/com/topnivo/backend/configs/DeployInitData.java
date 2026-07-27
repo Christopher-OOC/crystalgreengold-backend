@@ -118,7 +118,7 @@ public class DeployInitData {
             }
         }
 
-        Member premiumStore = memberRepository.findByUsername("premium-store");
+        Member premiumStore = memberRepository.findByUsernameIgnoreCase("premium-store");
         if (premiumStore != null && premiumStore.getCurrentPackage() == null) {
             premiumStore.setCurrentPackage(freePackage);
             memberRepository.save(premiumStore);

@@ -189,7 +189,7 @@ public class ProductService {
         boolean isAdminSuperAdmin = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
         String adminUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member admin = memberRepository.findByUsername(adminUserName);
+        Member admin = memberRepository.findByUsernameIgnoreCase(adminUserName);
         if (admin == null) {
             throw new NoSuchResourceException(ErrorMessages.NO_SUCH_MEMBER);
         }
