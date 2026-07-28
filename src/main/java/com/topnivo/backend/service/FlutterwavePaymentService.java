@@ -533,4 +533,42 @@ public class FlutterwavePaymentService {
 
         return returnValue;
     }
+
+    public TransferStatus getTransferStatus(TransferRecord transferRecord) {
+        TransferStatus status = transferRecord.getStatus();
+
+        if (transferRecord.getTransactionId() == null) {
+            return status;
+        }
+
+        String accessToken = getAccessToken();
+
+        HttpHeaders headersVerify = new HttpHeaders();
+        headersVerify.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        HttpEntity<String> httpEntityVerify = new HttpEntity<>(headersVerify);
+
+        try {
+            ResponseEntity<String> responseVerify =
+                    restTemplate.exchange(flwTransferGetUrl + "/" + transferRecord.getTransactionId(),
+                            HttpMethod.GET, httpEntityVerify, String.class);
+            Map<String, Object> responseMapVerify = objectMapper.readValue(responseVerify.getBody(), Map.class);
+            String responseStatus = (String) responseMapVerify.get("status");
+
+            if ("success".equalsIgnoreCase(responseStatus)) {
+                Map<String, Object> data = (Map<String, Object>) responseMapVerify.get("data");
+                String transferStatus = (String) data.get("status");
+
+                if ("SUCCESSFUL".equalsIgnoreCase(transferStatus)) {
+                    status = TransferStatus.COMPLETED;
+                }
+                else if  ("FAILED".equalsIgnoreCase(transferStatus)) {
+                    status = TransferStatus.FAILED;
+                }
+            }
+        } catch (Exception ignored) {
+
+        }
+
+        return status;
+    }
 }

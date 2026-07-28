@@ -2,6 +2,7 @@ package com.topnivo.backend.service;
 
 import com.topnivo.backend.model.constant.TransferStatus;
 import com.topnivo.backend.model.entity.TransferRecord;
+import com.topnivo.backend.repository.MemberRepository;
 import com.topnivo.backend.repository.TransferRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class TransferReconciliationJob {
 
     private final TransferRecordRepository transferRecordRepository;
     private final FlutterwavePaymentService flutterwavePaymentService;
+    private final MemberRepository memberRepository;
 
     @Async
     @Scheduled(cron = "0 * * * * ?", zone = AFRICA_LAGOS_TIMEZONE)
@@ -33,10 +35,17 @@ public class TransferReconciliationJob {
         log.info("Transfer reconciliation job found {} pending transfer records", pendingRecords.size());
 
         for (TransferRecord transferRecord : pendingRecords) {
-            if (flutterwavePaymentService.isTransferSuccessful(transferRecord)) {
+            TransferStatus status = flutterwavePaymentService.getTransferStatus(transferRecord);
+            if (TransferStatus.COMPLETED.equals(status)) {
                 transferRecord.setStatus(TransferStatus.COMPLETED);
 
                 transferRecordRepository.save(transferRecord);
+            } else if (TransferStatus.FAILED.equals(status)) {
+                transferRecord.setStatus(TransferStatus.FAILED);
+                transferRecord.getMember().setAvailableBalance(transferRecord.getMember().getAvailableBalance() + transferRecord.getAmount());
+
+                transferRecordRepository.save(transferRecord);
+                memberRepository.save(transferRecord.getMember());
             }
         }
     }
