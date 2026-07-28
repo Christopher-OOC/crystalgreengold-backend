@@ -79,5 +79,6 @@ public class ErrorMessages {
     public static final String FLW_CREDENTIALS_NOT_CONFIGURED = "Flutterwave credentials are not configured. Set FLW_CLIENT_ID and FLW_CLIENT_SECRET environment variables.";
     public static final String FLW_OAUTH_TOKEN_FAILED = "Failed to obtain Flutterwave OAuth2 access token.";
     public static final String FLW_INSUFFICIENT_FUNDS_FOR_PAYROLL = "Insufficient Flutterwave wallet balance for payroll disbursement!";
+    public static final String FLW_UNKNOWN_ERROR = "Unknown error happens which connecting to Flutterwave!";
 
 }

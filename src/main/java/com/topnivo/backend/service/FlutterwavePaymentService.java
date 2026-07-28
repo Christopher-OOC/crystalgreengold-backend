@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -165,7 +169,7 @@ public class FlutterwavePaymentService {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
-        String url = flwBanksUrl + "?country=N";
+        String url = flwBanksUrl + "?country=NG";
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
@@ -176,16 +180,21 @@ public class FlutterwavePaymentService {
     }
 
     public List<TransferRecord> getPayroll() {
-        validatePendingPayroll();
-        return transferRecordRepository.findByStatusIn(List.of(TransferStatus.PENDING, TransferStatus.INITIALIZED));
+        return transferRecordRepository.findByStatusIn(List.of(TransferStatus.INITIALIZED));
+    }
+
+    public List<TransferRecord> getPendingPayroll() {
+        return transferRecordRepository.findByStatusIn(List.of(TransferStatus.PENDING));
     }
 
     public void validatePendingPayroll() {
+        checkIfAdminIsValid();
         List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.PENDING);
         transferRecords.forEach(this::isTransferSuccessful);
     }
 
     public void deleteInitializedPayroll() {
+        checkIfAdminIsValid();
         List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.INITIALIZED);
         transferRecordRepository.deleteAll(transferRecords);
     }
@@ -205,8 +214,6 @@ public class FlutterwavePaymentService {
         List<Member> eligibleMembers = memberRepository.findByAvailableBalanceIsGreaterThanEqual(setting.getValue());
         List<TransferRecord> transferRecords = new ArrayList<>();
 
-        String accessToken = getAccessToken();
-
         for (Member member : eligibleMembers) {
             if (member.isEnabled() && member.getAccountDetails() != null && member.getCurrentPackage() != null && member.isCanReceivePayment()) {
                 TransferRecord transferRecord = new TransferRecord();
@@ -215,60 +222,7 @@ public class FlutterwavePaymentService {
                 transferRecord.setMember(member);
                 transferRecord.setAmount(member.getAvailableBalance());
                 transferRecord.setStatus(TransferStatus.INITIALIZED);
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-                headers.setContentType(MediaType.APPLICATION_JSON);
-
-                Map<String, Object> payload = new HashMap<>();
-                payload.put("action", "instant");
-                payload.put("type", "bank");
-                payload.put("reference", transferRecord.getReference());
-                payload.put("narration", transferRecord.getReason());
-
-                Map<String, Object> paymentInstruction = new HashMap<>();
-                Map<String, Object> amountObj = new HashMap<>();
-                amountObj.put("value", (int) transferRecord.getAmount());
-                amountObj.put("applies_to", "destination_currency");
-                paymentInstruction.put("amount", amountObj);
-                paymentInstruction.put("source_currency", "NGN");
-                paymentInstruction.put("destination_currency", "NGN");
-
-                Map<String, Object> recipient = new HashMap<>();
-                Map<String, Object> bank = new HashMap<>();
-                bank.put("code", member.getAccountDetails().getBankCode());
-                bank.put("account_number", member.getAccountDetails().getAccountNumber());
-                recipient.put("bank", bank);
-
-                Map<String, Object> name = new HashMap<>();
-                name.put("first", member.getFirstName());
-                name.put("last", member.getLastName());
-                recipient.put("name", name);
-
-                if (member.getEmail() != null) {
-                    recipient.put("email", member.getEmail());
-                }
-
-                paymentInstruction.put("recipient", recipient);
-                payload.put("payment_instruction", paymentInstruction);
-
-                HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload, headers);
-
-                try {
-                    ResponseEntity<String> responseEntity =
-                            restTemplate.exchange(flwDirectTransferUrl, HttpMethod.POST, httpEntity, String.class);
-                    Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), Map.class);
-                    String responseStatus = (String) responseMap.get("status");
-
-                    if ("success".equalsIgnoreCase(responseStatus)) {
-                        Map<String, Object> data = (Map<String, Object>) responseMap.get("data");
-                        String transferId = (String) data.get("id");
-                        transferRecord.setRecipientCode(transferId);
-                        transferRecords.add(transferRecord);
-                    }
-                } catch (Exception ignored) {
-                    log.info("Could not create Flutterwave transfer for: {}", member.getUsername());
-                }
+                transferRecords.add(transferRecord);
             }
         }
 
@@ -277,6 +231,9 @@ public class FlutterwavePaymentService {
 
     public void sendPayroll() {
         List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.INITIALIZED);
+        transferRecords.forEach((record) -> record.getMember().setAvailableBalance(0.0));
+        transferRecordRepository.saveAll(transferRecords);
+
         double totalPayout = transferRecords.stream().mapToDouble(TransferRecord::getAmount).sum();
 
         String accessToken = getAccessToken();
@@ -289,90 +246,121 @@ public class FlutterwavePaymentService {
             ResponseEntity<String> responseBalance =
                     restTemplate.exchange(flwWalletBalanceUrl + "/NGN", HttpMethod.GET, httpEntityBalance, String.class);
             Map<String, Object> responseMapBalance = objectMapper.readValue(responseBalance.getBody(), Map.class);
+            Map<String, Object> balanceData = (Map<String, Object>) responseMapBalance.get("data");
+            double balance = ((Number) balanceData.get("available_balance")).doubleValue();
             String balanceStatus = (String) responseMapBalance.get("status");
 
             if (!"success".equalsIgnoreCase(balanceStatus)) {
+                throw new BadRequestException(ErrorMessages.FLW_UNKNOWN_ERROR);
+            }
+            if (totalPayout > balance) {
                 throw new BadRequestException(ErrorMessages.FLW_INSUFFICIENT_FUNDS_FOR_PAYROLL);
             }
 
-            Map<String, Object> balanceData = (Map<String, Object>) responseMapBalance.get("data");
-            double balance = ((Number) balanceData.get("available_balance")).doubleValue();
+            try(ExecutorService executorService = Executors.newFixedThreadPool(10)) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setBearerAuth(accessToken);
+                headers.setContentType(MediaType.APPLICATION_JSON);
 
-            if (balance >= totalPayout) {
-                int totalRecords = transferRecords.size();
-                int batchSize = 100;
+                List<Future<?>> futures = new ArrayList<>();
 
-                for (int batchStart = 0; batchStart < totalRecords; batchStart += batchSize) {
-                    int batchEnd = Math.min(batchStart + batchSize, totalRecords);
-
-                    for (int i = batchStart; i < batchEnd; i++) {
-                        TransferRecord transferRecord = transferRecords.get(i);
-                        if (transferRecord.getRecipientCode() == null) {
-                            transferRecordRepository.deleteById(transferRecord.getId());
-                            continue;
-                        }
-
-                        HttpHeaders headers = new HttpHeaders();
-                        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-                        headers.setContentType(MediaType.APPLICATION_JSON);
-
-                        Map<String, Object> payload = new HashMap<>();
-                        payload.put("action", "instant");
-                        payload.put("type", "bank");
-                        payload.put("reference", transferRecord.getReference());
-                        payload.put("narration", transferRecord.getReason());
-
-                        Map<String, Object> paymentInstruction = new HashMap<>();
-                        Map<String, Object> amountObj = new HashMap<>();
-                        amountObj.put("value", (int) transferRecord.getAmount());
-                        amountObj.put("applies_to", "destination_currency");
-                        paymentInstruction.put("amount", amountObj);
-                        paymentInstruction.put("source_currency", "NGN");
-                        paymentInstruction.put("destination_currency", "NGN");
-
-                        Map<String, Object> recipient = new HashMap<>();
-                        Map<String, Object> bank = new HashMap<>();
-                        Member member = transferRecord.getMember();
-                        bank.put("code", member.getAccountDetails().getBankCode());
-                        bank.put("account_number", member.getAccountDetails().getAccountNumber());
-                        recipient.put("bank", bank);
-
-                        Map<String, Object> name = new HashMap<>();
-                        name.put("first", member.getFirstName());
-                        name.put("last", member.getLastName());
-                        recipient.put("name", name);
-
-                        if (member.getEmail() != null) {
-                            recipient.put("email", member.getEmail());
-                        }
-
-                        paymentInstruction.put("recipient", recipient);
-                        payload.put("payment_instruction", paymentInstruction);
-
-                        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload, headers);
-
+                for (TransferRecord transferRecord : transferRecords) {
+                    futures.add(executorService.submit(() -> {
                         try {
-                            restTemplate.exchange(flwDirectTransferUrl, HttpMethod.POST, httpEntity, String.class);
-                        } catch (Exception ignored) {
-                        }
-                    }
+                            HttpEntity<Map<String, Object>> entity =
+                                    new HttpEntity<>(buildTransferPayload(transferRecord), headers);
 
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                            ResponseEntity<String> response = restTemplate.exchange(
+                                    flwDirectTransferUrl,
+                                    HttpMethod.POST,
+                                    entity,
+                                    String.class
+                            );
+
+                            transferRecord.setStatus(TransferStatus.PENDING);
+
+                            Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), Map.class);
+                            String responseStatus = (String) responseMap.get("status");
+
+                            if ("success".equalsIgnoreCase(responseStatus)) {
+                                Map<String, Object> data = (Map<String, Object>) responseMap.get("data");
+                                String transferStatus = (String) data.get("status");
+                                String transferId = (String) data.get("id");
+
+                                log.info("Flutterwave transfer ID gotten: {}", transferId);
+
+                                if (transferStatus.equals("SUCCESS")) {
+                                    transferRecord.setStatus(TransferStatus.COMPLETED);
+                                }
+                                else if (transferStatus.equals("PENDING")) {
+                                    transferRecord.setStatus(TransferStatus.PENDING);
+                                }
+                                else {
+                                    transferRecord.getMember().setAvailableBalance(transferRecord.getAmount());
+                                    transferRecord.setStatus(TransferStatus.FAILED);
+                                }
+
+                                transferRecord.setTransactionId(transferId);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Transfer failed for {}", transferRecord.getMember().getAccountDetails().getAccountName(), ex);
+                            transferRecord.getMember().setAvailableBalance(transferRecord.getAmount());
+                            transferRecord.setStatus(TransferStatus.FAILED);
+                        }
+
+                        transferRecordRepository.save(transferRecord);
+                        memberRepository.save(transferRecord.getMember());
+                    }));
                 }
             }
-
-            transferRecords.forEach(record -> record.setStatus(TransferStatus.PENDING));
-            transferRecordRepository.saveAll(transferRecords);
-
-        } catch (BadRequestException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BadRequestException(ErrorMessages.FLW_INSUFFICIENT_FUNDS_FOR_PAYROLL);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private Map<String, Object> buildTransferPayload(TransferRecord transferRecord) {
+
+        Member member = transferRecord.getMember();
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("action", "instant");
+        payload.put("type", "bank");
+        payload.put("reference", transferRecord.getReference());
+        payload.put("narration", transferRecord.getReason());
+
+        Map<String, Object> paymentInstruction = new HashMap<>();
+        paymentInstruction.put("source_currency", "NGN");
+        paymentInstruction.put("destination_currency", "NGN");
+
+        Map<String, Object> amount = new HashMap<>();
+        amount.put("value", (int) transferRecord.getAmount());
+        amount.put("applies_to", "destination_currency");
+
+        paymentInstruction.put("amount", amount);
+
+        Map<String, Object> recipient = new HashMap<>();
+
+        Map<String, Object> bank = new HashMap<>();
+        bank.put("code", member.getAccountDetails().getBankCode());
+        bank.put("account_number", member.getAccountDetails().getAccountNumber());
+
+        recipient.put("bank", bank);
+
+        Map<String, Object> name = new HashMap<>();
+        name.put("first", member.getFirstName());
+        name.put("last", member.getLastName());
+
+        recipient.put("name", name);
+
+        if (member.getEmail() != null) {
+            recipient.put("email", member.getEmail());
+        }
+
+        paymentInstruction.put("recipient", recipient);
+
+        payload.put("payment_instruction", paymentInstruction);
+
+        return payload;
     }
 
     @Transactional
@@ -416,39 +404,7 @@ public class FlutterwavePaymentService {
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("action", "instant");
-            payload.put("type", "bank");
-            payload.put("reference", transferRecord.getReference());
-            payload.put("narration", transferRecord.getReason());
-
-            Map<String, Object> paymentInstruction = new HashMap<>();
-            Map<String, Object> amountObj = new HashMap<>();
-            amountObj.put("value", (int) amount);
-            amountObj.put("applies_to", "destination_currency");
-            paymentInstruction.put("amount", amountObj);
-            paymentInstruction.put("source_currency", "NGN");
-            paymentInstruction.put("destination_currency", "NGN");
-
-            Map<String, Object> recipient = new HashMap<>();
-            Map<String, Object> bank = new HashMap<>();
-            bank.put("code", store.getAccountDetails().getBankCode());
-            bank.put("account_number", store.getAccountDetails().getAccountNumber());
-            recipient.put("bank", bank);
-
-            Map<String, Object> name = new HashMap<>();
-            name.put("first", store.getFirstName());
-            name.put("last", store.getLastName());
-            recipient.put("name", name);
-
-            if (store.getEmail() != null) {
-                recipient.put("email", store.getEmail());
-            }
-
-            paymentInstruction.put("recipient", recipient);
-            payload.put("payment_instruction", paymentInstruction);
-
-            HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(payload, headers);
+            HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(buildTransferPayload(transferRecord), headers);
 
             try {
                 ResponseEntity<String> responseEntity =
@@ -458,19 +414,51 @@ public class FlutterwavePaymentService {
 
                 if ("success".equalsIgnoreCase(responseStatus)) {
                     Map<String, Object> data = (Map<String, Object>) responseMap.get("data");
+                    String transferStatus = (String) data.get("status");
                     String transferId = (String) data.get("id");
 
                     log.info("Flutterwave transfer ID gotten: {}", transferId);
-                    transferRecord.setRecipientCode(transferId);
-                    transferRecordRepository.save(transferRecord);
 
-                    sendPayroll();
-                    log.info("Flutterwave payment routed to the owner...");
+                    if (transferStatus.equals("SUCCESS")) {
+                        transferRecord.setStatus(TransferStatus.COMPLETED);
+                    }
+                    else if (transferStatus.equals("PENDING")) {
+                        transferRecord.setStatus(TransferStatus.PENDING);
+                    }
+                    else {
+                        transferRecord.getMember().setAvailableBalance(transferRecord.getMember().getAvailableBalance() + transferRecord.getAmount());
+                        transferRecord.setStatus(TransferStatus.FAILED);
+
+                        createTransactionIfPurchaseTransferNotSuccessful(transferRecord);
+                    }
+
+                    transferRecord.setTransactionId(transferId);
+                    transferRecordRepository.save(transferRecord);
+                    memberRepository.save(transferRecord.getMember());
                 }
-            } catch (Exception ignored) {
+            } catch (Exception ex) {
                 log.info("Could not send Flutterwave money for: {}", store.getUsername());
+                transferRecord.getMember().setAvailableBalance(transferRecord.getMember().getAvailableBalance() + transferRecord.getAmount());
+                transferRecord.setStatus(TransferStatus.FAILED);
+
+                transferRecordRepository.save(transferRecord);
+                memberRepository.save(transferRecord.getMember());
             }
         }
+    }
+
+    @Async
+    private void createTransactionIfPurchaseTransferNotSuccessful(TransferRecord transferRecord) {
+        Transaction transaction = new Transaction();
+        transaction.setAmount(transferRecord.getAmount());
+        transaction.setMemberId(transferRecord.getMember().getMemberId());
+        transaction.setType(TransactionType.INCOMING_PURCHASE);
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setTransactionDate(LocalDateTime.now());
+        transaction.setMessage("You received this because the purchase transfer was not successful.");
+        transaction.setReferenceId(transferRecord.getReference());
+
+        transactionRepository.save(transaction);
     }
 
     private List<Map<String, String>> extractBankData(String jsonResponse) {
@@ -508,9 +496,10 @@ public class FlutterwavePaymentService {
         }
     }
 
-    private void isTransferSuccessful(TransferRecord transferRecord) {
-        if (transferRecord == null || transferRecord.getRecipientCode() == null) {
-            return;
+    public boolean isTransferSuccessful(TransferRecord transferRecord) {
+        boolean returnValue = false;
+        if (transferRecord == null || transferRecord.getTransactionId() == null) {
+            return returnValue;
         }
 
         String accessToken = getAccessToken();
@@ -521,44 +510,27 @@ public class FlutterwavePaymentService {
 
         try {
             ResponseEntity<String> responseVerify =
-                    restTemplate.exchange(flwTransferGetUrl + "/" + transferRecord.getRecipientCode(),
+                    restTemplate.exchange(flwTransferGetUrl + "/" + transferRecord.getTransactionId(),
                             HttpMethod.GET, httpEntityVerify, String.class);
             Map<String, Object> responseMapVerify = objectMapper.readValue(responseVerify.getBody(), Map.class);
             String responseStatus = (String) responseMapVerify.get("status");
 
             if (!"success".equalsIgnoreCase(responseStatus)) {
-                return;
+                 returnValue = false;
             }
 
             Map<String, Object> data = (Map<String, Object>) responseMapVerify.get("data");
             String transferStatus = (String) data.get("status");
 
-            Member member = transferRecord.getMember();
-
-            Transaction transaction = new Transaction();
-            transaction.setReferenceId(transferRecord.getReference());
-            transaction.setMemberId(member.getMemberId());
-            transaction.setAmount(transferRecord.getAmount());
-            transaction.setMessage(transferRecord.getReason());
-            transaction.setTransactionDate(LocalDateTime.now());
-            transaction.setType(TransactionType.WITHDRAWAL);
-
             if ("SUCCESSFUL".equalsIgnoreCase(transferStatus)) {
-                member.setAvailableBalance(0.0);
-                transferRecord.setStatus(TransferStatus.COMPLETED);
-                transferRecordRepository.save(transferRecord);
-
-                transaction.setStatus(TransactionStatus.COMPLETED);
-                transactionRepository.save(transaction);
-                memberRepository.save(member);
-            } else if ("FAILED".equalsIgnoreCase(transferStatus) || "CANCELLED".equalsIgnoreCase(transferStatus)) {
-                transferRecord.setStatus(TransferStatus.DECLINED);
-                transaction.setStatus(TransactionStatus.DECLINED);
-
-                transactionRepository.save(transaction);
-                transferRecordRepository.save(transferRecord);
+                returnValue = true;
+            } else {
+                returnValue = false;
             }
         } catch (Exception ignored) {
+            returnValue = false;
         }
+
+        return returnValue;
     }
 }

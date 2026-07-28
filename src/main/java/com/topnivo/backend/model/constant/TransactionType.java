@@ -8,5 +8,6 @@ public enum TransactionType {
     BUY_PRODUCT,
     WITHDRAWAL,
     INTERNAL_TRANSFER,
+    INCOMING_PURCHASE,
 
 }
