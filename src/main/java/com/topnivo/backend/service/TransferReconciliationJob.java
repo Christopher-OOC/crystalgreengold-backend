@@ -24,7 +24,7 @@ public class TransferReconciliationJob {
     private final MemberRepository memberRepository;
 
     @Async
-    @Scheduled(cron = "0 * * * * ?", zone = AFRICA_LAGOS_TIMEZONE)
+    @Scheduled(cron = "0 */10 * * * ?", zone = AFRICA_LAGOS_TIMEZONE)
     public void reconcilePendingTransfers() {
         List<TransferRecord> pendingRecords = transferRecordRepository.findByStatus(TransferStatus.PENDING);
 
