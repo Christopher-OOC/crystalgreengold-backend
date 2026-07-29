@@ -180,23 +180,11 @@ public class FlutterwavePaymentService {
     }
 
     public List<TransferRecord> getPayroll() {
-        return transferRecordRepository.findByStatusIn(List.of(TransferStatus.INITIALIZED));
+        return transferRecordRepository.findByStatusIn(List.of(TransferStatus.INITIALIZED, TransferStatus.PENDING));
     }
 
     public List<TransferRecord> getPendingPayroll() {
         return transferRecordRepository.findByStatusIn(List.of(TransferStatus.PENDING));
-    }
-
-    public void validatePendingPayroll() {
-        checkIfAdminIsValid();
-        List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.PENDING);
-        transferRecords.forEach(this::isTransferSuccessful);
-    }
-
-    public void deleteInitializedPayroll() {
-        checkIfAdminIsValid();
-        List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.INITIALIZED);
-        transferRecordRepository.deleteAll(transferRecords);
     }
 
     public void deleteAPayrollEntry(int id) {
@@ -257,7 +245,8 @@ public class FlutterwavePaymentService {
                 throw new BadRequestException(ErrorMessages.FLW_INSUFFICIENT_FUNDS_FOR_PAYROLL);
             }
 
-            try(ExecutorService executorService = Executors.newFixedThreadPool(10)) {
+            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            try {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setBearerAuth(accessToken);
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -291,11 +280,9 @@ public class FlutterwavePaymentService {
 
                                 if (transferStatus.equals("SUCCESS")) {
                                     transferRecord.setStatus(TransferStatus.COMPLETED);
-                                }
-                                else if (transferStatus.equals("PENDING")) {
+                                } else if (transferStatus.equals("PENDING")) {
                                     transferRecord.setStatus(TransferStatus.PENDING);
-                                }
-                                else {
+                                } else {
                                     transferRecord.getMember().setAvailableBalance(transferRecord.getAmount());
                                     transferRecord.setStatus(TransferStatus.FAILED);
                                 }
@@ -312,6 +299,9 @@ public class FlutterwavePaymentService {
                         memberRepository.save(transferRecord.getMember());
                     }));
                 }
+            }
+            finally {
+                executorService.shutdown();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
