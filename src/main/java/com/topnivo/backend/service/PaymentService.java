@@ -135,7 +135,7 @@ public class PaymentService {
     }
 
     public List<TransferRecord> getPayroll() {
-        validatePendingPayroll();
+//        validatePendingPayroll();
 
         return transferRecordRepository.findByStatusIn(List.of(TransferStatus.PENDING, TransferStatus.INITIALIZED));
     }
