@@ -26,6 +26,8 @@ public class TransferReconciliationJob {
     @Async
     @Scheduled(cron = "0 */10 * * * ?", zone = AFRICA_LAGOS_TIMEZONE)
     public void reconcilePendingTransfers() {
+        log.info("Running reconciliation job for pending transfer records...");
+
         List<TransferRecord> pendingRecords = transferRecordRepository.findByStatus(TransferStatus.PENDING);
 
         if (pendingRecords.isEmpty()) {
