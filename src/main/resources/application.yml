@@ -59,17 +59,17 @@ paystack:
     transferBulk: https://api.paystack.co/transfer/bulk
     balance: https://api.paystack.co/balance
 flutterwave:
-  clientId: ${FLW_CLIENT_ID:}
-  clientSecret: ${FLW_CLIENT_SECRET:}
+  clientId: ${FLW_CLIENT_ID:f2442950-62a5-462b-ab2d-ffd7f962ea48}
+  clientSecret: ${FLW_CLIENT_SECRET:DAZJe7YLnQ8FqNAdKUEPUlQuvF6pvNvn}
   verifyPayment: ${FLW_VERIFY_PAYMENT:false}
   v3SecretKey: ${FLW_V3_SECRET_KEY:}
   url:
     token: https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token
-    banks: https://developersandbox-api.flutterwave.com/banks
+    banks: https://f4bexperience.flutterwave.com/banks
     transactionVerifyV3: https://api.flutterwave.com/v3/transactions/verify
-    walletBalance: https://developersandbox-api.flutterwave.com/wallets/balances
-    directTransfer: https://developersandbox-api.flutterwave.com/direct-transfers
-    transferGet: https://developersandbox-api.flutterwave.com/transfers
+    walletBalance: https://f4bexperience.flutterwave.com/wallets/balances
+    directTransfer: https://f4bexperience.flutterwave.com/direct-transfers
+    transferGet: https://f4bexperience.flutterwave.com/transfers
 keep:
   chris:
     clientId: 71f01fa0-8f17-4d4a-9c50-57dd08a4032f

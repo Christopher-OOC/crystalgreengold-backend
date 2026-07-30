@@ -33,7 +33,7 @@ public class FlutterwavePaymentController {
     private final MemberMapper memberMapper;
     private final ModelMapper modelMapper;
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/banks")
     public ResponseEntity<?> getAllBanks() {
         List<Map<String, String>> allBanks = flutterwavePaymentService.findAllBanks();
         ApiResponse<List<Map<String, String>>> response = new ApiResponse<>(

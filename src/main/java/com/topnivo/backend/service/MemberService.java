@@ -340,7 +340,7 @@ public class MemberService {
             assert currentNode != null;
             setNodeProperties(currentNode, currentMember);
 
-            if (currentLevel <= 3) {
+            if (currentLevel <= 4) {
                 if (currentMember.getLeftLeg() != null) {
                     MemberNodeResponse leftNode = new MemberNodeResponse();
                     leftNode.setLevel(currentLevel);

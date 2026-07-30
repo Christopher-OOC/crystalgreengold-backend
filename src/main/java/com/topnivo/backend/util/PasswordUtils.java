@@ -18,4 +18,14 @@ public class PasswordUtils {
 //        return value.toString();
         return "123456";
     }
+
+    public static String generateNumbers(int length) {
+        StringBuilder value = new StringBuilder();
+        Random random = new SecureRandom();
+        for (int i = 0; i < length; i++) {
+            value.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+
+        return value.toString();
+    }
 }

@@ -48,7 +48,7 @@ public class Member {
     @Temporal(TemporalType.DATE)
     @CreationTimestamp
     private Date registeredOn;
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     private Cart cart;
     @OneToMany(fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
