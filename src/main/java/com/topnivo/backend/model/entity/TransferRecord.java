@@ -33,7 +33,7 @@ public class TransferRecord {
     private String transactionId;
     @Temporal(TemporalType.DATE)
     @CreationTimestamp
-    private Date registeredOn;
+    private Date transferDate;
     @Enumerated(EnumType.STRING)
     private TransferType type;
 

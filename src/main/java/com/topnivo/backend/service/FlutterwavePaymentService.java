@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -218,7 +219,8 @@ public class FlutterwavePaymentService {
     public void sendPayroll() {
         List<TransferRecord> transferRecords = transferRecordRepository.findByStatus(TransferStatus.INITIALIZED);
         transferRecords.forEach((record) -> record.getMember().setAvailableBalance(0.0));
-        transferRecordRepository.saveAll(transferRecords);
+        List<Member> members = transferRecords.stream().map(TransferRecord::getMember).collect(Collectors.toList());
+        memberRepository.saveAll(members);
 
         double totalPayout = transferRecords.stream().mapToDouble(TransferRecord::getAmount).sum();
 
@@ -243,7 +245,7 @@ public class FlutterwavePaymentService {
                 throw new BadRequestException(ErrorMessages.FLW_INSUFFICIENT_FUNDS_FOR_PAYROLL);
             }
 
-            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            ExecutorService executorService = Executors.newFixedThreadPool(20);
             try {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setBearerAuth(accessToken);
