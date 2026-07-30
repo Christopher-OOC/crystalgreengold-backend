@@ -1,6 +1,7 @@
 package com.topnivo.backend.model.entity;
 
 import com.topnivo.backend.model.constant.TransferStatus;
+import com.topnivo.backend.model.constant.TransferType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,5 +34,8 @@ public class TransferRecord {
     @Temporal(TemporalType.DATE)
     @CreationTimestamp
     private Date registeredOn;
+    @Enumerated(EnumType.STRING)
+    private TransferType type;
+
 
 }

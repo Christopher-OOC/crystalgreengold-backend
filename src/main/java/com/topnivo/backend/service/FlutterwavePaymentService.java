@@ -2,10 +2,7 @@ package com.topnivo.backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.topnivo.backend.exception.exception.*;
-import com.topnivo.backend.model.constant.AdminSettings;
-import com.topnivo.backend.model.constant.TransactionStatus;
-import com.topnivo.backend.model.constant.TransactionType;
-import com.topnivo.backend.model.constant.TransferStatus;
+import com.topnivo.backend.model.constant.*;
 import com.topnivo.backend.model.entity.AdminSetting;
 import com.topnivo.backend.model.entity.Member;
 import com.topnivo.backend.model.entity.Transaction;
@@ -210,6 +207,7 @@ public class FlutterwavePaymentService {
                 transferRecord.setMember(member);
                 transferRecord.setAmount(member.getAvailableBalance());
                 transferRecord.setStatus(TransferStatus.INITIALIZED);
+                transferRecord.setType(TransferType.PAYOUT);
                 transferRecords.add(transferRecord);
             }
         }
@@ -389,6 +387,7 @@ public class FlutterwavePaymentService {
             transferRecord.setMember(store);
             transferRecord.setAmount(amount);
             transferRecord.setStatus(TransferStatus.INITIALIZED);
+            transferRecord.setType(TransferType.PURCHASE);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
