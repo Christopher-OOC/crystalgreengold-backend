@@ -32,7 +32,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final StoreProductRepository storeProductRepository;
     private final CartItemRepository cartItemRepository;
-    private final PaymentService paymentService;
+    private final FlutterwavePaymentService paymentService;
     private final CommissionService commissionService;
     private final EmailService emailService;
     private final TransactionRepository transactionRepository;

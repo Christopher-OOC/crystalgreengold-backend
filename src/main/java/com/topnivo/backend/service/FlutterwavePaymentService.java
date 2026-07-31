@@ -371,7 +371,7 @@ public class FlutterwavePaymentService {
     @Transactional
     public void sendMoneyToStoreOwner(Member store, double amount) {
         if (store == null) {
-            Member admin = memberRepository.findByUsername("admin");
+            Member admin = memberRepository.findByUsernameIgnoreCase("admin");
             if (admin.getAccountDetails() != null) {
                 log.info("About to send Flutterwave money to admin details: {}", admin.getAccountDetails());
                 transferToStoreOwner(admin, amount);
