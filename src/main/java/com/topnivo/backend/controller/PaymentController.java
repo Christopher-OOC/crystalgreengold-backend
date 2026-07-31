@@ -9,6 +9,7 @@ import com.topnivo.backend.model.response.ApiResponse;
 import com.topnivo.backend.model.response.OrderResponse;
 import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.model.response.TransferRecordResponse;
+import com.topnivo.backend.service.FlutterwavePaymentService;
 import com.topnivo.backend.service.OrderService;
 import com.topnivo.backend.service.PaymentService;
 import jakarta.mail.MessagingException;
@@ -29,13 +30,14 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final FlutterwavePaymentService flutterwavePaymentService;
     private final OrderService orderService;
     private final MemberMapper memberMapper;
     private final ModelMapper modelMapper;
 
     @GetMapping(value = "")
     public ResponseEntity<?> getAllBanks() {
-        List<Map<String, String>> allBanks = paymentService.findAllBanks();
+        List<Map<String, String>> allBanks = flutterwavePaymentService.findAllBanks();
         ApiResponse<List<Map<String, String>>> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
                 "Banks retrieved successfully!",
@@ -73,7 +75,7 @@ public class PaymentController {
 
     @GetMapping(value = "/get-payroll")
     public ResponseEntity<?> getPayroll() {
-        List<TransferRecord> transferRecords = paymentService.getPayroll();
+        List<TransferRecord> transferRecords = flutterwavePaymentService.getPayroll();
         List<TransferRecordResponse> recordResponseList = new ArrayList<>();
         for (TransferRecord transferRecord : transferRecords) {
             TransferRecordResponse recordResponse = new TransferRecordResponse();
@@ -99,7 +101,7 @@ public class PaymentController {
 
     @GetMapping(value = "/prepare-payroll")
     public ResponseEntity<?> preparePayroll() {
-        List<TransferRecord> transferRecords = paymentService.preparePayroll();
+        List<TransferRecord> transferRecords = flutterwavePaymentService.preparePayroll();
         List<TransferRecordResponse> recordResponseList = new ArrayList<>();
         for (TransferRecord transferRecord : transferRecords) {
             TransferRecordResponse recordResponse = new TransferRecordResponse();
@@ -125,7 +127,7 @@ public class PaymentController {
 
     @DeleteMapping(value = "/payroll-entry/{id}")
     public ResponseEntity<?> deleteAPayrollEntry(@PathVariable("id") int id) {
-        paymentService.deleteAPayrollEntry(id);
+        flutterwavePaymentService.deleteAPayrollEntry(id);
 
         ApiResponse<String> response = new ApiResponse<>(
                 ResponseStatus.DELETED.name(),
@@ -139,7 +141,7 @@ public class PaymentController {
 
     @PostMapping(value = "/send-payroll")
     public ResponseEntity<?> sendPayroll() {
-        paymentService.sendPayroll();
+        flutterwavePaymentService.sendPayroll();
 
         ApiResponse<String> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
