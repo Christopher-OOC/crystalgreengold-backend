@@ -204,7 +204,7 @@ public class FlutterwavePaymentService {
         for (Member member : eligibleMembers) {
             if (member.isEnabled() && member.getAccountDetails() != null && member.getCurrentPackage() != null && member.isCanReceivePayment()) {
                 TransferRecord transferRecord = new TransferRecord();
-                transferRecord.setReason("Topnivo has credited you " + member.getAvailableBalance());
+                transferRecord.setReason("CGGL has credited you " + member.getAvailableBalance());
                 transferRecord.setReference(TransactionUtils.generateReferenceId());
                 transferRecord.setMember(member);
                 transferRecord.setAmount(member.getAvailableBalance());

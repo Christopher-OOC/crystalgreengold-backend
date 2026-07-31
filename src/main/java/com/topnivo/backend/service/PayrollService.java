@@ -32,7 +32,7 @@ public class PayrollService {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
 
-            writer.write("S/N,Username,Amount,Account Name,Bank,Rank,Package");
+            writer.write("S/N,Username,Amount,Account Name,Account Number,Bank,Rank,Package");
             writer.newLine();
 
             int serialNumber = 1;
@@ -52,6 +52,7 @@ public class PayrollService {
                         escapeCsv(member.getUsername()),
                         String.valueOf(transferRecord.getAmount()),
                         escapeCsv(accountDetails != null ? accountDetails.getAccountName() : ""),
+                        escapeCsv(accountDetails != null ? accountDetails.getAccountNumber() : ""),
                         escapeCsv(accountDetails != null ? accountDetails.getBankName() : ""),
                         escapeCsv(member.getRank() != null ? member.getRank().getName() : ""),
                         escapeCsv(member.getCurrentPackage() != null
