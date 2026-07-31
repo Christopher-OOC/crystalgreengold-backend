@@ -14,8 +14,6 @@ import java.util.TimeZone;
 @EnableScheduling
 public class TopnivoBackendApplication {
 
-	// keytool -genkey -alias https_cert -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 365
-
 	public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("Africa/Lagos"));
 

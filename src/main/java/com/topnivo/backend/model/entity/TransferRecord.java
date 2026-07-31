@@ -1,13 +1,15 @@
 package com.topnivo.backend.model.entity;
 
 import com.topnivo.backend.model.constant.TransferStatus;
+import com.topnivo.backend.model.constant.TransferType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @Builder
@@ -28,4 +30,12 @@ public class TransferRecord {
     private String recipientCode;
     @Enumerated(EnumType.STRING)
     private TransferStatus status;
+    private String transactionId;
+    @Temporal(TemporalType.DATE)
+    @CreationTimestamp
+    private Date transferDate;
+    @Enumerated(EnumType.STRING)
+    private TransferType type;
+
+
 }

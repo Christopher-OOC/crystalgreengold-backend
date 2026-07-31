@@ -11,7 +11,6 @@ import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.model.response.TransferRecordResponse;
 import com.topnivo.backend.service.FlutterwavePaymentService;
 import com.topnivo.backend.service.OrderService;
-import com.topnivo.backend.service.PaymentService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,18 +23,17 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/api/v1/payments")
+@RequestMapping(value = "/api/v1/flutterwave/payments")
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentController {
+public class FlutterwavePaymentController {
 
-    private final PaymentService paymentService;
     private final FlutterwavePaymentService flutterwavePaymentService;
     private final OrderService orderService;
     private final MemberMapper memberMapper;
     private final ModelMapper modelMapper;
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/banks")
     public ResponseEntity<?> getAllBanks() {
         List<Map<String, String>> allBanks = flutterwavePaymentService.findAllBanks();
         ApiResponse<List<Map<String, String>>> response = new ApiResponse<>(
@@ -54,7 +52,7 @@ public class PaymentController {
             @RequestBody PaymentOrderRequest paymentRequest
     ) throws MessagingException {
         String paymentReference = paymentRequest.getPaymentReference();
-        double amountPaid = paymentService.checkPaymentValidity(paymentReference);
+        double amountPaid = flutterwavePaymentService.checkPaymentValidity(paymentReference);
         OrderRequest orderRequest = OrderRequest.builder()
                 .memberType(paymentRequest.getMemberType())
                 .address(paymentRequest.getAddress())
@@ -65,7 +63,7 @@ public class PaymentController {
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
         ApiResponse<OrderResponse> response = new ApiResponse<>(
                 ResponseStatus.CREATED.name(),
-                "Payment verified and order created successfully!",
+                "Flutterwave payment verified and order created successfully!",
                 orderResponse,
                 null
         );
@@ -91,7 +89,7 @@ public class PaymentController {
 
         ApiResponse<List<TransferRecordResponse>> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
-                "Initialized transfer records retrieved successfully!",
+                "Flutterwave initialized transfer records retrieved successfully!",
                 recordResponseList,
                 null
         );
@@ -117,7 +115,7 @@ public class PaymentController {
 
         ApiResponse<List<TransferRecordResponse>> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
-                "Initialized transfer records retrieved successfully!",
+                "Flutterwave initialized transfer records retrieved successfully!",
                 recordResponseList,
                 null
         );
@@ -131,7 +129,7 @@ public class PaymentController {
 
         ApiResponse<String> response = new ApiResponse<>(
                 ResponseStatus.DELETED.name(),
-                "Payroll entry deleted successfully!",
+                "Flutterwave payroll entry deleted successfully!",
                 "The payroll has been deleted!",
                 null
         );
@@ -145,7 +143,7 @@ public class PaymentController {
 
         ApiResponse<String> response = new ApiResponse<>(
                 ResponseStatus.SUCCESS.name(),
-                "Payroll sent but you might need to wait for some moment to confirm all payments are sent successfully!",
+                "Flutterwave payroll sent but you might need to wait for some moment to confirm all payments are sent successfully!",
                 "The payroll has been sent!",
                 null
         );

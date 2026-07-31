@@ -340,7 +340,7 @@ public class MemberService {
             assert currentNode != null;
             setNodeProperties(currentNode, currentMember);
 
-            if (currentLevel <= 3) {
+            if (currentLevel <= 4) {
                 if (currentMember.getLeftLeg() != null) {
                     MemberNodeResponse leftNode = new MemberNodeResponse();
                     leftNode.setLevel(currentLevel);
@@ -1012,6 +1012,10 @@ public class MemberService {
     }
 
     private UserRoleType determineUserRoleType(Member member) {
+        if (member == null) {
+            return null;
+        }
+
         String role = member.getRoles().stream()
                 .map(Role::getName)
                 .filter(r -> !r.equals("ROLE_REGULAR_MEMBER"))
