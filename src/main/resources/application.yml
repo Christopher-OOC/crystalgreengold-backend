@@ -13,7 +13,7 @@ spring:
 #    username: postgres
 #    password: chris
   jpa:
-    showSql: true
+    showSql: false
     hibernate:
       ddlAuto: update
     properties:
@@ -70,8 +70,3 @@ flutterwave:
     walletBalance: https://f4bexperience.flutterwave.com/wallets/balances
     directTransfer: https://f4bexperience.flutterwave.com/direct-transfers
     transferGet: https://f4bexperience.flutterwave.com/transfers
-keep:
-  chris:
-    clientId: 71f01fa0-8f17-4d4a-9c50-57dd08a4032f
-    secret: 3nPEl2e7ZpOPITQiVbqai8tJkiUV2M5d
-    encrytionKey: zHTKzLo4MLX9EnwEwvO4YNjjt4Te1F3BwO/tK0/3EpY=
