@@ -78,7 +78,8 @@ public class PayrollService {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
 
-            writer.write("Bank Name,Account Number,Amount,Narration");
+            // CSV Header
+            writer.write("\"Account Number\",\"Bank\",\"Amount\",\"Narration\"");
             writer.newLine();
 
             for (TransferRecord transferRecord : transferRecords) {
@@ -91,16 +92,22 @@ public class PayrollService {
                     continue;
                 }
 
-                String bankName = escapeCsv(member.getAccountDetails().getBankName());
-                String accountNumber = escapeCsv(member.getAccountDetails().getAccountNumber());
-                String amount = String.valueOf(transferRecord.getAmount());
-                String narration = escapeCsv(transferRecord.getReason());
+                AccountDetails accountDetails = member.getAccountDetails();
 
-                writer.write(String.join(",",
-                        bankName,
-                        accountNumber,
-                        amount,
-                        narration));
+                String accountNumber = accountDetails.getAccountNumber();
+                String bank = accountDetails.getBankName().toLowerCase();
+                String amount = String.valueOf(transferRecord.getAmount());
+                String narration = transferRecord.getReason() == null
+                        ? ""
+                        : transferRecord.getReason();
+
+                writer.write(String.format(
+                        "\"%s\",\"%s\",\"%s\",\"%s\"",
+                        escapeCsv(accountNumber),
+                        escapeCsv(bank),
+                        escapeCsv(amount),
+                        escapeCsv(narration)
+                ));
 
                 writer.newLine();
             }
@@ -110,7 +117,6 @@ public class PayrollService {
 
         return new ByteArrayResource(outputStream.toByteArray());
     }
-
     private String escapeCsv(String value) {
 
         if (value == null) {
