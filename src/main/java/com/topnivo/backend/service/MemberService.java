@@ -439,7 +439,7 @@ public class MemberService {
         UserRoleType adminType = determineUserRoleType();
         UserRoleType userRoleType = determineUserRoleType(member);
 
-        if (adminType == UserRoleType.ADMIN) {
+        if (adminType == UserRoleType.ADMIN || adminType == UserRoleType.SUPER_ADMIN) {
             if (member.getCurrentPackage() == null) {
                 returnOrder = activateNewPackage(member, store, newPackage, userRoleType);
             } else {
