@@ -33,7 +33,7 @@ public class CommissionService {
     private final EarnedPromotionRepository earnedPromotionRepository;
     private final RankRepository rankRepository;
     private final PackageRepository packageRepository;
-    private EventRepository eventRepository;
+    private final EventRepository eventRepository;
 
     private static final String AFRICA_LAGOS_TIMEZONE = "Africa/Lagos";
     private static final String MONTHLY_RESET_CRON = "0 0 0 1 * ?";
