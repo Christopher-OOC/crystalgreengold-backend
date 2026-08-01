@@ -140,7 +140,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     @PutMapping(value = "/{memberId}/activate-package/{packageId}")
     public ResponseEntity<?> adminActivateUserPackage(
             @PathVariable("memberId") String memberId,
