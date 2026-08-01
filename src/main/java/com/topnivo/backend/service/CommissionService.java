@@ -33,6 +33,7 @@ public class CommissionService {
     private final EarnedPromotionRepository earnedPromotionRepository;
     private final RankRepository rankRepository;
     private final PackageRepository packageRepository;
+    private EventRepository eventRepository;
 
     private static final String AFRICA_LAGOS_TIMEZONE = "Africa/Lagos";
     private static final String MONTHLY_RESET_CRON = "0 0 0 1 * ?";
@@ -505,7 +506,6 @@ public class CommissionService {
         return Math.round(value * 100.0) / 100.0;
     }
 
-    @Transactional
     public void tryGivingRankToMember(Member member) {
         if (member == null) {
             return;
@@ -541,15 +541,11 @@ public class CommissionService {
 
         member.setRank(qualifiedRank);
 
-        double value;
-
-        if (member.getRank() == null) {
-            value = addMonetaryValueToAvailableBalance(member, qualifiedRank.getPrize());
-        } else {
-            value = addPvMonetaryValueToAvailableBalanceAndAwaitingWallet(member, qualifiedRank.getPrize());
-        }
+        double value = addMonetaryValueToAvailableBalance(member, qualifiedRank.getPrize());
 
         memberRepository.save(member);
+
+        emitRankEvent(member, qualifiedRank.getPrize());
 
         createCommissionRecord(
                 member,
@@ -559,6 +555,26 @@ public class CommissionService {
         );
 
         sendLeadershipCelebrationBonus(member, qualifiedRank.getPrize());
+    }
+
+    @Async
+    private void emitRankEvent(Member member, double price) {
+        Event event = new Event();
+        event.setType(EventType.NEW_RANK);
+        event.setAcknowledged(false);
+
+        String rankName = member.getRank() != null
+                ? member.getRank().getName()
+                : "New Rank";
+
+        event.setMessage(String.format(
+                "Congratulations %s! 🎉 You have earned a new rank: %s, with a reward of ₦%,.2f.",
+                member.getUsername(),
+                rankName,
+                price
+        ));
+
+        eventRepository.save(event);
     }
 
     public void sendLeadershipCelebrationBonus(Member member, double amount) {
