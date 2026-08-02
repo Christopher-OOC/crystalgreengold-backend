@@ -150,8 +150,8 @@ public class CommissionService {
         if (member == null) return;
 
         double pvFactor = getAdminSettingValue(AdminSettings.PV_COMMISSION_FACTOR);
-        if (pvFactor <= 0) {
-            throw new IllegalStateException("PV commission factor must be > 0");
+        if (pvFactor == 0) {
+            return;
         }
 
         Package freePackage = packageRepository.findByName(PackageName.FREE.name());

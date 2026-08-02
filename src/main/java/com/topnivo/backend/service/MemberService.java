@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -975,7 +976,13 @@ public class MemberService {
                     }
                 }
 
+                double awaitingWallet = buyer.getAwaitingWallet();
+
                 buyer.setAccumulatedPv(buyer.getAccumulatedPv() + pv);
+                buyer.setAvailableBalance(buyer.getAvailableBalance() + awaitingWallet);
+                buyer.setAwaitingWallet(0.0);
+
+                createTransferTransaction(buyer.getMemberId(), awaitingWallet, String.format("Your awaiting wallet balance of %f has been added to your available balance", awaitingWallet));
             }
 
             List<Transaction> transactions = transactionRepository.findByOrderId(orderId);
@@ -1232,6 +1239,7 @@ public class MemberService {
         }
     }
 
+    @Async
     private void createTransferTransaction(String memberId, double amount, String message) {
         Transaction transaction = new Transaction();
         transaction.setMemberId(memberId);
