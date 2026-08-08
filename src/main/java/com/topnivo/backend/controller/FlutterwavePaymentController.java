@@ -10,6 +10,7 @@ import com.topnivo.backend.model.response.OrderResponse;
 import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.model.response.TransferRecordResponse;
 import com.topnivo.backend.service.FlutterwavePaymentService;
+import com.topnivo.backend.service.MemberService;
 import com.topnivo.backend.service.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class FlutterwavePaymentController {
 
     private final FlutterwavePaymentService flutterwavePaymentService;
     private final OrderService orderService;
+    private final MemberService memberService;
     private final MemberMapper memberMapper;
     private final ModelMapper modelMapper;
 
@@ -60,6 +62,7 @@ public class FlutterwavePaymentController {
                 .build();
 
         Order order = orderService.makePaidOrder(memberId, orderRequest, paymentReference, amountPaid);
+        memberService.confirmOrderById(memberId, order.getOrderId(), "CONFIRMED");
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
         ApiResponse<OrderResponse> response = new ApiResponse<>(
                 ResponseStatus.CREATED.name(),
