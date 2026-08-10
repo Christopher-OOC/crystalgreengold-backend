@@ -4,7 +4,6 @@ import com.topnivo.backend.model.entity.Transaction;
 import com.topnivo.backend.model.response.ApiResponse;
 import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.model.response.TransactionResponse;
-import com.topnivo.backend.service.PaymentService;
 import com.topnivo.backend.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -49,7 +49,7 @@ public class MemberService {
     private final MemberMapper memberMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-    private final PaymentService paymentService;
+    private final FlutterwavePaymentService paymentService;
     private final TransactionRepository transactionRepository;
     private final PromotionRepository promotionRepository;
     private final EarnedPromotionRepository earnedPromotionRepository;
