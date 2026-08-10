@@ -28,7 +28,7 @@ public class CommissionService {
     private final MemberRepository memberRepository;
     private final EarningCommissionRepository earningCommissionRepository;
     private final AdminSettingRepository adminSettingRepository;
-    private final TransactionRepository transactionRepository;
+    // private final TransactionRepository transactionRepository;
     private final PromotionRepository promotionRepository;
     private final EarnedPromotionRepository earnedPromotionRepository;
     private final RankRepository rankRepository;
@@ -116,7 +116,9 @@ public class CommissionService {
         switch (packageName) {
             case "FREE", "STARTER", "BASIC", "BRONZE", "SILVER", "GOLD", "DIAMOND", "PLATINUM":
                 return switch (level) {
-                    case 1 -> 30;
+                    case 1 -> sponsor.getCurrentPackage() != null
+                            ? sponsor.getCurrentPackage().getDirectCommissionRate()
+                            : 26.0;
                     case 2 -> 3;
                     case 3 -> 1;
                     case 4 -> 1;

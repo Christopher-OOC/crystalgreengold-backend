@@ -9,9 +9,9 @@ import com.topnivo.backend.model.entity.ProductOrderItem;
 import com.topnivo.backend.model.request.OrderRequest;
 import com.topnivo.backend.model.response.*;
 import com.topnivo.backend.model.response.ResponseStatus;
+import com.topnivo.backend.service.FlutterwavePaymentService;
 import com.topnivo.backend.service.MemberService;
 import com.topnivo.backend.service.OrderService;
-import com.topnivo.backend.service.PaymentService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final PaymentService paymentService;
+    private final FlutterwavePaymentService paymentService;
     private final ModelMapper modelMapper;
     private final MemberService memberService;
     private final MemberMapper memberMapper;

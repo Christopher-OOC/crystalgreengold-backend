@@ -31,8 +31,7 @@ public class ErrorMessages {
     public static final String INVALID_MEMBER_CART = "Cart does not belong to member!";
     public static final String INVALID_CART_ITEM = "No such cart item in your cart!";
     public static final String NO_CART_ITEM = "No such cart item!";
-    public static final String INVALID_PAYMENT = "Payment verification failed. Confirm the Paystack reference is valid and the frontend public key matches the backend secret key mode.";
-    public static final String PAYSTACK_SECRET_KEY_NOT_CONFIGURED = "Paystack secret key is not configured. Set PAYSTACK_SECRET_KEY to the matching sk_test or sk_live key.";
+    public static final String INVALID_PAYMENT = "Payment verification failed. Confirm the transaction reference is valid.";
     public static final String PACKAGE_ALREADY_EXISTS = "Package with the same name already exists!";
     public static final String ADMIN_SETTINGS_NOT_CREATED = "Please create all admin settings!";
     public static final String INVALID_LEG = "Leg must either be LEFT or RIGHT!";

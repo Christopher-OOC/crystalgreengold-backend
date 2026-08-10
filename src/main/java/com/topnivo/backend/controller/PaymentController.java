@@ -11,7 +11,6 @@ import com.topnivo.backend.model.response.ResponseStatus;
 import com.topnivo.backend.model.response.TransferRecordResponse;
 import com.topnivo.backend.service.FlutterwavePaymentService;
 import com.topnivo.backend.service.OrderService;
-import com.topnivo.backend.service.PaymentService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,6 @@ import java.util.Map;
 @Slf4j
 public class PaymentController {
 
-    private final PaymentService paymentService;
     private final FlutterwavePaymentService flutterwavePaymentService;
     private final OrderService orderService;
     private final MemberMapper memberMapper;
@@ -54,7 +52,7 @@ public class PaymentController {
             @RequestBody PaymentOrderRequest paymentRequest
     ) throws MessagingException {
         String paymentReference = paymentRequest.getPaymentReference();
-        double amountPaid = paymentService.checkPaymentValidity(paymentReference);
+        double amountPaid = flutterwavePaymentService.checkPaymentValidity(paymentReference);
         OrderRequest orderRequest = OrderRequest.builder()
                 .memberType(paymentRequest.getMemberType())
                 .address(paymentRequest.getAddress())
